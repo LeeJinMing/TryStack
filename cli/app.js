@@ -6,6 +6,7 @@ const { usage } = require("./usage");
 const { listCommand } = require("./commands/list");
 const { doctorCommand } = require("./commands/doctor");
 const { verifyRecipesCommand } = require("./commands/verify-recipes");
+const { scaffoldCommand, usageScaffold } = require("./commands/scaffold");
 const { manageCommand } = require("./commands/manage");
 const { runCommand } = require("./commands/run");
 
@@ -37,6 +38,16 @@ async function main() {
     console.log(`Command: ${command}`);
     console.log("");
     const code = await verifyRecipesCommand({ args, jsonOutput });
+    process.exit(code);
+  }
+
+  if (command === "scaffold") {
+    const input = resolveRepoInput(args);
+    if (!input) {
+      usageScaffold();
+      process.exit(EXIT.USAGE);
+    }
+    const code = await scaffoldCommand({ input, args });
     process.exit(code);
   }
 
