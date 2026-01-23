@@ -2,7 +2,7 @@
 const path = require("node:path");
 const { EXIT } = require("../lib/constants");
 const { getArgValue } = require("../lib/args");
-const { parseRepo, repoRoot, sanitizeProjectName } = require("../lib/repo");
+const { parseRepo, sanitizeProjectName } = require("../lib/repo");
 const { ensureDir, writeFileIfChanged } = require("../lib/files");
 
 function usageScaffold() {
@@ -106,7 +106,10 @@ async function scaffoldCommand({ input, args }) {
   const recipeId = getArgValue(args, "--recipe") || "default";
   const dryRun = args.includes("--dry-run");
 
-  const base = repoRoot();
+  // IMPORTANT:
+  // Scaffold should write into the user's current directory (not into the CLI install folder).
+  // This allows `npx ... trystack scaffold ...` to generate files in-place.
+  const base = process.cwd();
   const recipeDir = path.join(base, "recipes", repo.owner, repo.repo, recipeId);
 
   // Compose project name is used elsewhere; keep it stable for future docs.
@@ -139,6 +142,7 @@ async function scaffoldCommand({ input, args }) {
 
   console.log(`Created scaffold for ${repo.owner}/${repo.repo} (${recipeId})`);
   console.log(`- ${path.join("recipes", repo.owner, repo.repo, recipeId)}`);
+  console.log(`dir: ${recipeDir}`);
   console.log("");
   console.log("Next:");
   console.log("- Edit recipe.yaml + compose.yaml + README.md");
