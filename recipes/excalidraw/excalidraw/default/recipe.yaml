@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: excalidraw
+  repo: excalidraw
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: excalidraw
+    protocol: http
+    hostPort: 5004
+    containerPort: 80
+
+ui:
+  url: "http://localhost:5004"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    No setup required. Open the UI and start drawing.
+  limitations: |
+    This recipe is for local evaluation (Try locally).
+

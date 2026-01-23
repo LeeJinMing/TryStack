@@ -1,0 +1,12 @@
+services:
+  changedetection:
+    image: dgtlmoon/changedetection.io:latest
+    restart: unless-stopped
+    ports:
+      - "5003:5000"
+    volumes:
+      - changedetection-data:/datastore
+
+volumes:
+  changedetection-data:
+

@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: dgtlmoon
+  repo: changedetection.io
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: changedetection
+    protocol: http
+    hostPort: 5003
+    containerPort: 5000
+
+ui:
+  url: "http://localhost:5003"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    No setup required. Add a URL and configure a watcher.
+  limitations: |
+    This recipe is for local evaluation (Try locally). Some optional features may require additional services.
+

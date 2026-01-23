@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: redis
+  repo: redisinsight
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: redisinsight
+    protocol: http
+    hostPort: 5541
+    containerPort: 5540
+
+ui:
+  url: "http://localhost:5541"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    Open the UI and add a Redis database connection.
+  limitations: |
+    This recipe is for local evaluation (Try locally).
+

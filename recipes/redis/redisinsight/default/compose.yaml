@@ -1,0 +1,12 @@
+services:
+  redisinsight:
+    image: redis/redisinsight:latest
+    restart: unless-stopped
+    ports:
+      - "5541:5540"
+    volumes:
+      - redisinsight-data:/data
+
+volumes:
+  redisinsight-data:
+
