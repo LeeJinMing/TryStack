@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: louislam
+  repo: uptime-kuma
+  ref: ">=1.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: uptime-kuma
+    protocol: http
+    hostPort: 3001
+    containerPort: 3001
+
+ui:
+  url: "http://localhost:3001"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    首次启动访问 UI，按引导创建管理员账号。
+  limitations: |
+    该 recipe 用于本地试用（Try locally），不包含生产环境加固与备份策略。
+

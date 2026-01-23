@@ -1,0 +1,119 @@
+name: Verify Recipe
+
+on:
+  pull_request:
+    paths:
+      - "recipes/**"
+      - "spec/**"
+      - ".github/workflows/**"
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install python deps
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install pyyaml
+
+      - name: Validate recipe.yaml exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! compgen -G "recipes/*/*/*/recipe.yaml" > /dev/null; then
+            echo "No recipe.yaml found under recipes/<owner>/<repo>/<recipeId>/recipe.yaml"
+            exit 1
+          fi
+
+      - name: Verify each recipe (best-effort)
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s globstar nullglob
+
+          failures=0
+          for recipe in recipes/*/*/*/recipe.yaml; do
+            dir="$(dirname "$recipe")"
+            echo "=== Verifying $dir ==="
+
+            meta="$(python -c 'import json,sys,yaml; data=yaml.safe_load(open(sys.argv[1], "r", encoding="utf-8")) or {}; compose_file=((data.get("runtime") or {}).get("composeFile") or ""); ui_url=((data.get("ui") or {}).get("url") or ""); hc=((data.get("ui") or {}).get("healthcheck") or {}); hc_path=(hc.get("path") or "/"); expect_status=hc.get("expectStatus"); expect_status=200 if expect_status is None else int(expect_status); match=(hc.get("match") or ""); print(json.dumps({"composeFile": compose_file, "uiUrl": ui_url, "hcPath": hc_path, "expectStatus": expect_status, "match": match}))' "$recipe")"
+
+            compose_file="$(echo "$meta" | jq -r '.composeFile')"
+            if [[ -z "$compose_file" ]]; then
+              echo "Missing runtime.composeFile in $recipe"
+              failures=$((failures+1))
+              continue
+            fi
+
+            if [[ ! -f "$dir/$compose_file" ]]; then
+              echo "composeFile '$compose_file' not found in $dir"
+              failures=$((failures+1))
+              continue
+            fi
+
+            ui_url="$(echo "$meta" | jq -r '.uiUrl')"
+            hc_path="$(echo "$meta" | jq -r '.hcPath')"
+            expect_status="$(echo "$meta" | jq -r '.expectStatus')"
+            match="$(echo "$meta" | jq -r '.match')"
+
+            if [[ -z "$ui_url" ]]; then
+              echo "Missing ui.url in $recipe"
+              failures=$((failures+1))
+              continue
+            fi
+
+            # Create isolated compose project name
+            proj="ghui_$(echo "$dir" | tr '/.' '__')_${GITHUB_RUN_ID}"
+
+            # Bring up
+            pushd "$dir" >/dev/null
+            echo "Starting compose ($compose_file) ..."
+            docker compose -p "$proj" -f "$compose_file" up -d --remove-orphans || { popd >/dev/null; failures=$((failures+1)); continue; }
+
+            # Wait for UI
+            # - Follow redirects (many SPAs redirect / -> /login etc.)
+            # - Prefer IPv4 for localhost (some runners resolve localhost to ::1 first)
+            echo "Waiting for UI: ${ui_url}${hc_path}"
+            ok=0
+            for i in {1..60}; do
+              status="$(curl -sS -L -4 -o /tmp/body.txt -w "%{http_code}" "${ui_url}${hc_path}" || true)"
+              if [[ "$status" == "$expect_status" ]]; then
+                if [[ -n "$match" ]]; then
+                  if grep -qi --fixed-strings "$match" /tmp/body.txt; then
+                    ok=1
+                    break
+                  fi
+                else
+                  ok=1
+                  break
+                fi
+              fi
+              sleep 5
+            done
+
+            if [[ "$ok" != "1" ]]; then
+              echo "UI check failed for $dir"
+              echo "--- docker compose ps ---"
+              docker compose -p "$proj" -f "$compose_file" ps || true
+              echo "--- docker compose logs (tail) ---"
+              docker compose -p "$proj" -f "$compose_file" logs --no-color --tail 200 || true
+              failures=$((failures+1))
+            fi
+
+            # Cleanup
+            docker compose -p "$proj" -f "$compose_file" down -v --remove-orphans || true
+            popd >/dev/null
+          done
+
+          if [[ "$failures" -gt 0 ]]; then
+            echo "$failures recipe(s) failed verification."
+            exit 1
+          fi
+

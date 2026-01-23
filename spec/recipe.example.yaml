@@ -1,0 +1,40 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: example
+  repo: example-app
+  # 推荐写 semver range 或 tag；v0 允许任意字符串
+  ref: ">=1.0.0,<2.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    # 可选：对应 compose 的 service 名称（用于端口重映射/排障）
+    service: app
+    protocol: http
+    hostPort: 3000
+    containerPort: 3000
+
+ui:
+  url: "http://localhost:3000"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    # 可选：提高验证可靠性（匹配页面标题/关键字）
+    match: "Example App"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    首次启动后，访问 UI 完成初始化（如创建管理员账号）。
+  limitations: |
+    该 recipe 用于本地试用，不包含生产环境最佳实践。
+

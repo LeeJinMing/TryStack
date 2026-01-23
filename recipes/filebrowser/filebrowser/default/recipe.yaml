@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: filebrowser
+  repo: filebrowser
+  ref: ">=2.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: filebrowser
+    protocol: http
+    hostPort: 8080
+    containerPort: 80
+
+ui:
+  url: "http://localhost:8080"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    默认账号通常为 admin/admin（以项目文档为准）。首次进入请立即修改密码。
+  limitations: |
+    该 recipe 用于本地试用（Try locally）。会挂载一个本地数据卷到 /srv（用于演示文件浏览）。
+

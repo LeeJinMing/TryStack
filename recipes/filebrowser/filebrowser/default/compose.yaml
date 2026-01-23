@@ -1,0 +1,14 @@
+services:
+  filebrowser:
+    image: filebrowser/filebrowser:s6
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - filebrowser-srv:/srv
+      - filebrowser-db:/database
+
+volumes:
+  filebrowser-srv:
+  filebrowser-db:
+
