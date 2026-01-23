@@ -1,0 +1,12 @@
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    restart: unless-stopped
+    ports:
+      - "8222:80"
+    volumes:
+      - vaultwarden-data:/data
+
+volumes:
+  vaultwarden-data:
+

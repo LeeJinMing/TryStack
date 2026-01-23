@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: dani-garcia
+  repo: vaultwarden
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: vaultwarden
+    protocol: http
+    hostPort: 8222
+    containerPort: 80
+
+ui:
+  url: "http://localhost:8222"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    Open the UI and create an account. Data is persisted in a local Docker volume.
+  limitations: |
+    This recipe is for local evaluation (Try locally). Do not expose this instance to the public internet.
+

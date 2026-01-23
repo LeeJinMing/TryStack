@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: syncthing
+  repo: syncthing
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: syncthing
+    protocol: http
+    hostPort: 8385
+    containerPort: 8384
+
+ui:
+  url: "http://localhost:8385"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    Open the UI and follow the onboarding prompts.
+  limitations: |
+    This recipe exposes only the Web UI port for quick evaluation.
+

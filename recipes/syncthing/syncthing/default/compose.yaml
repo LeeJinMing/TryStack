@@ -1,0 +1,12 @@
+services:
+  syncthing:
+    image: syncthing/syncthing:latest
+    restart: unless-stopped
+    ports:
+      - "8385:8384"
+    volumes:
+      - syncthing-data:/var/syncthing
+
+volumes:
+  syncthing-data:
+

@@ -2,6 +2,8 @@
 
 English | [Chinese](README.zh-CN.md)
 
+Latest release: `v0.0.1` (`https://github.com/LeeJinMing/TryStack/releases/tag/v0.0.1`)
+
 **TryStack** gives open-source projects a **one-click “try locally” entry point**.
 It uses a verified **recipe** (Docker Compose) so anyone can run an app locally and open its UI in minutes.
 

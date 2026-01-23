@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: corentinth
+  repo: it-tools
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: it-tools
+    protocol: http
+    hostPort: 8077
+    containerPort: 80
+
+ui:
+  url: "http://localhost:8077"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    No setup required. Open the UI and start using the tools.
+  limitations: |
+    This recipe is for local evaluation (Try locally).
+
