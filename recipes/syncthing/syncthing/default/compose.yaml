@@ -2,6 +2,10 @@ services:
   syncthing:
     image: syncthing/syncthing:latest
     restart: unless-stopped
+    environment:
+      # Ensure the Web UI listens on all interfaces inside the container.
+      # This avoids CI/local access issues when the UI would otherwise bind to 127.0.0.1.
+      - STGUIADDRESS=0.0.0.0:8384
     ports:
       - "8385:8384"
     volumes:
