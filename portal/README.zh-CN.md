@@ -1,6 +1,6 @@
 # TryStack Portal
 
-Minimal portal page for the Try locally entry point.
+最小化的 Portal 页面（“Try locally” 入口）。
 
 ## Scripts
 
@@ -16,14 +16,14 @@ node dev.js --dist
 
 ## Repo hygiene
 
-Allowed to commit (source + config):
+可上传到远程仓：
 
 - `portal/index.html`
 - `portal/src/**`
 - `portal/build.js` / `portal/dev.js`
 - `portal/package.json` / `portal/package-lock.json`
 
-Do not commit (generated / local-only):
+不可上传（本地生成/缓存）：
 
 - `portal/node_modules/`
 - `portal/dist/`

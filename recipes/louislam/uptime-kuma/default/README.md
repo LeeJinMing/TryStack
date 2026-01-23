@@ -2,18 +2,18 @@
 
 ## What you get
 
-- **Try locally**: 启动后访问 `http://localhost:3001` 打开 UI。
-- **No external keys**: 基础体验不需要第三方 API key。
+- **Try locally**: After startup, open `http://localhost:3001` in your browser.
+- **No external keys**: The basic experience does not require any third-party API keys.
 
 ## Run
 
-在本目录执行：
+In this directory:
 
 ```bash
 docker compose up -d
 ```
 
-打开 `http://localhost:3001`，按引导创建管理员账号。
+Open `http://localhost:3001` and follow the onboarding flow to create an admin account.
 
 ## Stop
 

@@ -30,7 +30,7 @@ env:
 
 notes:
   setup: |
-    首次启动访问 UI，按引导创建管理员账号。
+    On first run, open the UI and follow the onboarding flow to create an admin account.
   limitations: |
-    该 recipe 用于本地试用（Try locally），不包含生产环境加固与备份策略。
+    This recipe is for local evaluation (Try locally). It does not cover production hardening or backup strategy.
 

@@ -1,13 +1,15 @@
-# trystack-cli (local)
+# trystack-cli (local development)
 
-从本仓库 `recipes/` 或 GitHub registry 中解析对应项目的 recipe，并输出本地启动命令（可选直接执行）。
+English | [Chinese](README.zh-CN.md)
 
-> 默认优先本地 `../recipes`，缺失时回退到 registry（可用 `--prefer-registry` 强制优先远端）。
+Local CLI package for developing/debugging TryStack. It resolves recipes from `../recipes` (local) or a GitHub registry and prints (or runs) the Docker Compose commands.
 
-## Package 说明
+> Default behavior: prefer local `../recipes`, and fall back to the registry when missing (use `--prefer-registry` to force remote first).
 
-- 根目录包：`trystack`（`npx trystack ...`，面向用户）
-- 本目录包：`trystack-cli`（本地开发/调试）
+## Packages
+
+- Root package: `trystack` (end-user entry point via `npx trystack ...`)
+- This folder: `trystack-cli` (local dev/debug)
 
 ## Usage
 
@@ -15,40 +17,40 @@
 cd cli
 npm i
 
-# 或本地安装后直接使用 bin：
+# Or use the local package bin:
 # npx trystack-cli up louislam/uptime-kuma
 
-# 默认（up）：启动 docker compose 并自动打开 UI
+# Default (up): start docker compose and open the UI
 node entry.js up louislam/uptime-kuma
 
-# Back-compat（仍可用）：不写子命令等价于 up
+# Back-compat: omitting subcommand is equivalent to `up`
 node entry.js louislam/uptime-kuma
 
-# 仅打印启动命令（不执行）
+# Print only (no docker)
 node entry.js print louislam/uptime-kuma
 node entry.js louislam/uptime-kuma --no-run
 
-# 查看可用 recipes / 指定 recipe
+# List available recipes / choose a recipeId
 node entry.js list louislam/uptime-kuma
 node entry.js louislam/uptime-kuma --list
 node entry.js louislam/uptime-kuma --recipe default
 node entry.js list louislam/uptime-kuma --json
 
-# 排障/管理（与 up 使用同一个 compose projectName）
+# Manage (shares the same compose projectName with `up`)
 node entry.js ps louislam/uptime-kuma
 node entry.js logs louislam/uptime-kuma --tail 200
 node entry.js stop louislam/uptime-kuma
 node entry.js down louislam/uptime-kuma
 
-# 自检（环境 + 当前 project 状态/端口/校验）
+# Diagnose (environment + project status / ports / validation)
 node entry.js doctor louislam/uptime-kuma
 node entry.js doctor louislam/uptime-kuma --json
 
-# 校验本仓库全部本地 recipes（给 CI 用；不依赖 docker）
+# Validate all local recipes (for CI; no docker required)
 node entry.js verify-recipes --json
 ```
 
-## list --json 输出
+## list --json output
 
 ```json
 {
@@ -60,91 +62,16 @@ node entry.js verify-recipes --json
 }
 ```
 
-## doctor 输出字段
+## doctor fields (plain text)
 
-- 基本信息：`Repo` / `Recipe` / `Recipe dir` / `Project` / `Source` / `Cache dir`
-- 环境：`node` / `platform` / `docker` / `docker compose`
-- 配方：`recipe.yaml` / `compose file` / `override` / `recipe validation`
-- 检查项：`ui.healthcheck` / `ports` / `env.required` / `env.optional`
-- 运行态：`docker compose config` 结果、`docker compose ps`、可用时的 `Precheck`
-  - `--json` 额外包含 `envMissing` / `composeConfig` / `ps` / `precheck`
+- Basics: `Repo` / `Recipe` / `Recipe dir` / `Project` / `Source` / `Cache dir`
+- Environment: `node` / `platform` / `docker` / `docker compose`
+- Recipe: `recipe.yaml` / `compose file` / `override` / `recipe validation`
+- Checks: `ui.healthcheck` / `ports` / `env.required` / `env.optional`
+- Runtime: `docker compose config` result, `docker compose ps`, and (when available) `Precheck`
+  - `--json` also includes `envMissing` / `composeConfig` / `ps` / `precheck`
 
-## doctor --json 输出
-
-字段清单：
-
-- `repo` / `recipeId` / `recipeDir` / `projectName` / `source` / `cacheDir`
-- `registry` / `preferRegistry` / `uiUrl`
-- `environment.node` / `environment.platform` / `environment.docker` / `environment.compose`
-- `recipe.recipeYaml` / `recipe.composeFile` / `recipe.override` / `recipe.validationErrors`
-- `checks.healthcheck` / `checks.portsCount` / `checks.envRequired` / `checks.envOptional` / `checks.envMissing`
-- `composeConfig` / `ps` / `precheck`
-
-示例输出：
-
-```json
-{
-  "repo": "owner/repo",
-  "recipeId": "default",
-  "recipeDir": "D:\\path\\to\\recipes\\owner\\repo\\default",
-  "projectName": "ghui_owner_repo_default",
-  "source": "local",
-  "cacheDir": "C:\\Users\\me\\.githubui-cache",
-  "registry": "owner/recipes-repo@main",
-  "preferRegistry": false,
-  "uiUrl": "http://localhost:3000",
-  "environment": {
-    "node": "v20.11.0",
-    "platform": "win32 x64",
-    "docker": "ok",
-    "dockerVersion": "Docker version 25.0.3, build 4debf41",
-    "compose": "ok",
-    "composeVersion": "Docker Compose version v2.24.6"
-  },
-  "recipe": {
-    "recipeYaml": "ok",
-    "composeFile": "ok",
-    "override": "absent",
-    "validationErrors": []
-  },
-  "checks": {
-    "healthcheck": {
-      "method": "GET",
-      "path": "/",
-      "expectStatus": 200,
-      "match": "Example"
-    },
-    "portsCount": 1,
-    "envRequired": [],
-    "envOptional": [],
-    "envMissing": []
-  },
-  "composeConfig": {
-    "ok": true,
-    "exitCode": 0
-  },
-  "ps": {
-    "ok": true,
-    "running": true,
-    "services": [
-      {
-        "name": "app",
-        "state": "running",
-        "status": "Up 2 minutes",
-        "health": ""
-      }
-    ]
-  },
-  "precheck": {
-    "ok": true,
-    "status": 200,
-    "matchOk": true,
-    "url": "http://localhost:3000/"
-  }
-}
-```
-
-## 退出码
+## Exit codes
 
 - `0` ok
 - `1` usage / invalid input
@@ -156,15 +83,15 @@ node entry.js verify-recipes --json
 - `7` required env missing
 - `127` docker or compose missing
 
-## Registry 相关
+## Registry options
 
 ```bash
-# 指定 registry 仓库与 ref
+# Choose registry repo and ref
 node entry.js up louislam/uptime-kuma --registry owner/recipes-repo --registry-ref main
 
-# 强制优先从 registry 拉取（用于验证远端 recipes）
+# Force registry-first (for validating remote recipes)
 node entry.js up louislam/uptime-kuma --prefer-registry
 
-# 指定本地缓存目录
+# Set a custom cache dir
 node entry.js up louislam/uptime-kuma --cache-dir "D:\cache\trystack"
 ```

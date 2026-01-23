@@ -1,5 +1,7 @@
 # TryStack
 
+English | [Chinese](README.zh-CN.md)
+
 **TryStack** gives open-source projects a **one-click “try locally” entry point**.
 It uses a verified **recipe** (Docker Compose) so anyone can run an app locally and open its UI in minutes.
 
@@ -13,7 +15,7 @@ trystack ps louislam/uptime-kuma
 
 ## Portal (online)
 
-After you enable GitHub Pages (Settings → Pages → Source: GitHub Actions), the Portal will be available at:
+After you enable GitHub Pages (Settings → Pages → Source: GitHub Actions), the Portal is available at:
 
 `https://leejinming.github.io/TryStack/`
 
@@ -41,9 +43,9 @@ trystack doctor louislam/uptime-kuma
 trystack doctor louislam/uptime-kuma --json
 ```
 
-`list --json` 输出字段：`repo` / `source` / `localPath` / `registry` / `recipeIds`。
+`list --json` fields: `repo` / `source` / `localPath` / `registry` / `recipeIds`.
 
-退出码：`0` ok，`1` usage，`2` not found，`3` UI timeout，`4` port in use，`5` registry error，`6` recipe invalid，`7` required env missing，`127` docker/compose missing。
+Exit codes: `0` ok, `1` usage, `2` not found, `3` UI timeout, `4` port in use, `5` registry error, `6` recipe invalid, `7` required env missing, `127` docker/compose missing.
 
 ## What you get
 
@@ -66,7 +68,7 @@ trystack doctor louislam/uptime-kuma --json
 
 ## Version pinning (recommended)
 
-For reproducible runs, pin to a tag once we publish releases (example):
+For reproducible runs, pin to a tag (example):
 
 `npx --yes -p github:LeeJinMing/TryStack#v0.0.1 trystack up louislam/uptime-kuma`
 
@@ -91,20 +93,20 @@ npm run build
 node dev.js --dist
 ```
 
-Portal 仅提交源码与脚本；`portal/dist/` 与 `portal/node_modules/` 不入库（已在 `.gitignore` 中忽略）。
+Portal source only is committed; `portal/dist/` and `portal/node_modules/` are ignored by `.gitignore`.
 
-## 提交规范
+## Repo hygiene
 
-可提交（源码与配置）：
+Allowed to commit (source + config):
 
 - `recipes/**`
 - `spec/**`
 - `cli/**`
-- `portal/**`（不含构建产物）
+- `portal/**` (without build artifacts)
 - `.github/workflows/**`
-- `README.md`
+- `README.md` / `README.zh-CN.md`
 
-不可提交（本地生成/缓存）：
+Do not commit (generated / local-only):
 
 - `**/node_modules/`
 - `**/dist/`
