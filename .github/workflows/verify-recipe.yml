@@ -118,6 +118,10 @@ jobs:
             echo "Starting compose ($compose_file) ..."
             docker compose -p "$proj" -f "$compose_file" up -d --remove-orphans || { popd >/dev/null; failures=$((failures+1)); continue; }
 
+            # Give the container a moment to finish binding the UI port.
+            # Some apps will accept TCP but close early requests during initialization.
+            sleep 5
+
             # Wait for UI
             # - Follow redirects (many SPAs redirect / -> /login etc.)
             # - Prefer IPv4 for localhost (some runners resolve localhost to ::1 first)
