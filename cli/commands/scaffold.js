@@ -84,8 +84,8 @@ function templateReadmeMd({ owner, repo, recipeId }) {
     "",
     "```bash",
     recipeId === "default"
-      ? `npx --yes -p github:LeeJinMing/TryStack trystack up ${owner}/${repo}`
-      : `npx --yes -p github:LeeJinMing/TryStack trystack up ${owner}/${repo} --recipe ${recipeId}`,
+      ? `npx --yes -p github:LeeJinMing/TryStack#v0.0.1 trystack up ${owner}/${repo}`
+      : `npx --yes -p github:LeeJinMing/TryStack#v0.0.1 trystack up ${owner}/${repo} --recipe ${recipeId}`,
     "```",
     "",
     "## Notes",

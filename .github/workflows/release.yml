@@ -1,0 +1,67 @@
+name: Create GitHub Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag name to release (e.g. v0.0.1)"
+        required: true
+        default: "v0.0.1"
+      prerelease:
+        description: "Mark as prerelease"
+        required: true
+        default: "false"
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve inputs
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            tag="${{ inputs.tag }}"
+            prerelease="${{ inputs.prerelease }}"
+          else
+            tag="${GITHUB_REF_NAME}"
+            prerelease="false"
+          fi
+
+          notes="docs/release-notes/${tag}.md"
+          if [[ -f "${notes}" ]]; then
+            echo "has_notes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_notes=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "prerelease=${prerelease}" >> "$GITHUB_OUTPUT"
+          echo "notes_path=${notes}" >> "$GITHUB_OUTPUT"
+
+      - name: Create release (notes file)
+        if: ${{ steps.meta.outputs.has_notes == 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          body_path: ${{ steps.meta.outputs.notes_path }}
+          prerelease: ${{ steps.meta.outputs.prerelease == 'true' }}
+
+      - name: Create release (auto notes)
+        if: ${{ steps.meta.outputs.has_notes != 'true' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          generate_release_notes: true
+          prerelease: ${{ steps.meta.outputs.prerelease == 'true' }}
+

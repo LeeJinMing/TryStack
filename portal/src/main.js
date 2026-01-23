@@ -3,6 +3,8 @@ if (yearEl) {
   yearEl.textContent = String(new Date().getFullYear());
 }
 
+const NPX_PACKAGE = (typeof window !== "undefined" && window.TRYSTACK_NPX_PACKAGE) || "github:LeeJinMing/TryStack#v0.0.1";
+
 async function fetchJson(url) {
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error(`${url} -> ${res.status}`);
@@ -179,7 +181,7 @@ async function initRecipes() {
         const repo = parsed.repo;
         const hits = recipes.filter((r) => r.owner === owner && r.repo === repo);
         if (hits.length === 0) {
-          const scaffold = `npx --yes -p github:LeeJinMing/TryStack trystack scaffold ${owner}/${repo}`;
+          const scaffold = `npx --yes -p ${NPX_PACKAGE} trystack scaffold ${owner}/${repo}`;
           repoResult.innerHTML = `<div class="bad">No recipe found for <b>${owner}/${repo}</b> yet.</div>
             <div class="row muted">You (or the maintainer) can add one via a PR to this repo.</div>
             <div class="row"><button id="repoScaffoldCopy" class="btn primary" type="button">Copy scaffold command</button></div>
@@ -214,7 +216,7 @@ async function initRecipes() {
         const buildCmd = () => {
           const rid = String(sel?.value || "default");
           const args = rid === "default" ? `trystack up ${owner}/${repo}` : `trystack up ${owner}/${repo} --recipe ${rid}`;
-          return `npx --yes -p github:LeeJinMing/TryStack ${args}`;
+          return `npx --yes -p ${NPX_PACKAGE} ${args}`;
         };
         if (copy) {
           copy.addEventListener("click", async () => {

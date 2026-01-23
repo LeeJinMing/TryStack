@@ -6,6 +6,9 @@ const dist = path.join(root, "dist");
 const repoRoot = path.resolve(root, "..");
 const recipesRoot = path.join(repoRoot, "recipes");
 
+const DEFAULT_NPX_PACKAGE = "github:LeeJinMing/TryStack#v0.0.1";
+const NPX_PACKAGE = process.env.TRYSTACK_NPX_PACKAGE || DEFAULT_NPX_PACKAGE;
+
 function ensureDir(p) {
   fs.mkdirSync(p, { recursive: true });
 }
@@ -61,7 +64,7 @@ function buildRecipesIndex() {
           recipeId === "default"
             ? `trystack up ${owner}/${repo}`
             : `trystack up ${owner}/${repo} --recipe ${recipeId}`;
-        const command = `npx --yes -p github:LeeJinMing/TryStack ${args}`;
+        const command = `npx --yes -p ${NPX_PACKAGE} ${args}`;
 
         entries.push({
           owner,

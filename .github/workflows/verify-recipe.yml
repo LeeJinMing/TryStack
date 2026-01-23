@@ -5,6 +5,19 @@ on:
     paths:
       - "recipes/**"
       - "spec/**"
+      - "cli/**"
+      - "portal/**"
+      - "README*.md"
+      - ".github/workflows/**"
+  push:
+    branches: ["main"]
+    paths:
+      - "recipes/**"
+      - "spec/**"
+      - "cli/**"
+      - "portal/**"
+      - "README*.md"
+      - "docs/**"
       - ".github/workflows/**"
 
 jobs:
