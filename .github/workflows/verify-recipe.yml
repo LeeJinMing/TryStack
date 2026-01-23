@@ -124,7 +124,10 @@ jobs:
             echo "Waiting for UI: ${ui_url}${hc_path}"
             ok=0
             for i in {1..60}; do
-              status="$(curl -sS -L -4 -o /tmp/body.txt -w "%{http_code}" "${ui_url}${hc_path}" || true)"
+              # NOTE:
+              # curl may exit non-zero (e.g. connection reset) while the service is starting.
+              # Convert errors into an HTTP code "000" and keep retrying instead of aborting early.
+              status="$(curl -sS -L -4 -o /tmp/body.txt -w "%{http_code}" "${ui_url}${hc_path}" 2>/dev/null || echo 000)"
               if [[ "$status" == "$expect_status" ]]; then
                 if [[ -n "$match" ]]; then
                   if grep -qi --fixed-strings "$match" /tmp/body.txt; then

@@ -21,7 +21,7 @@ ui:
   url: "http://localhost:8385"
   healthcheck:
     method: GET
-    path: /
+    path: /rest/noauth/health
     expectStatus: 200
 
 env:
