@@ -52,6 +52,38 @@ async function copyToClipboard(text) {
   }
 }
 
+function parseRepoInput(raw) {
+  const s = String(raw || "").trim();
+  if (!s) return null;
+
+  // owner/repo
+  let m = s.match(/^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/);
+  if (m) return { owner: m[1], repo: m[2] };
+
+  // https://github.com/owner/repo(.git)?(/)?
+  m = s.match(/^https?:\/\/github\.com\/([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)(?:\.git)?\/?$/);
+  if (m) return { owner: m[1], repo: m[2] };
+
+  // git@github.com:owner/repo(.git)?
+  m = s.match(/^git@github\.com:([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+?)(?:\.git)?$/);
+  if (m) return { owner: m[1], repo: m[2] };
+
+  return null;
+}
+
+function getRepoFromQuery() {
+  try {
+    const u = new URL(window.location.href);
+    const repo = u.searchParams.get("repo");
+    if (repo) return repo;
+    const url = u.searchParams.get("url") || u.searchParams.get("github");
+    if (url) return url;
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
 function renderRecipes(recipes, filterText) {
   const list = document.getElementById("recipesList");
   if (!list) return;
@@ -113,7 +145,7 @@ function renderRecipes(recipes, filterText) {
 async function loadRecipes() {
   // Prefer static build artifact; fall back to dev API.
   try {
-    return await fetchJson("/data/recipes.json");
+    return await fetchJson("./data/recipes.json");
   } catch {
     return await fetchJson("/api/recipes");
   }
@@ -129,6 +161,8 @@ async function initRecipes() {
     renderRecipes(recipes, "");
     search.addEventListener("input", () => renderRecipes(recipes, search.value));
 
+    const CONTRIBUTING_URL = "https://github.com/LeeJinMing/TryStack/blob/main/CONTRIBUTING.md";
+
     // Try a repo lookup
     const repoInput = document.getElementById("repoInput");
     const repoGo = document.getElementById("repoGo");
@@ -136,16 +170,26 @@ async function initRecipes() {
     if (repoInput && repoGo && repoResult) {
       const renderLookup = async () => {
         const raw = String(repoInput.value || "").trim();
-        const m = raw.match(/^([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)$/);
-        if (!m) {
-          repoResult.innerHTML = `<div class="bad">Please enter owner/repo</div>`;
+        const parsed = parseRepoInput(raw);
+        if (!parsed) {
+          repoResult.innerHTML = `<div class="bad">Please enter owner/repo or a GitHub URL</div>`;
           return;
         }
-        const owner = m[1];
-        const repo = m[2];
+        const owner = parsed.owner;
+        const repo = parsed.repo;
         const hits = recipes.filter((r) => r.owner === owner && r.repo === repo);
         if (hits.length === 0) {
-          repoResult.innerHTML = `<div class="bad">No recipe found for <b>${owner}/${repo}</b> yet.</div>`;
+          const scaffold = `npx --yes -p github:LeeJinMing/TryStack trystack scaffold ${owner}/${repo}`;
+          repoResult.innerHTML = `<div class="bad">No recipe found for <b>${owner}/${repo}</b> yet.</div>
+            <div class="row muted">You (or the maintainer) can add one via a PR to this repo.</div>
+            <div class="row"><button id="repoScaffoldCopy" class="btn primary" type="button">Copy scaffold command</button></div>
+            <div class="row"><a class="btn" href="${CONTRIBUTING_URL}" target="_blank" rel="noreferrer">How to add a recipe</a></div>`;
+          const scaffoldBtn = document.getElementById("repoScaffoldCopy");
+          if (scaffoldBtn) {
+            scaffoldBtn.addEventListener("click", async () => {
+              await copyToClipboard(scaffold);
+            });
+          }
           return;
         }
 
@@ -183,6 +227,12 @@ async function initRecipes() {
       repoInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter") renderLookup();
       });
+
+      const fromQuery = getRepoFromQuery();
+      if (fromQuery) {
+        repoInput.value = fromQuery;
+        renderLookup();
+      }
     }
   } catch (e) {
     setCount("failed to load");

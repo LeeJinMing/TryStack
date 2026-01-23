@@ -11,6 +11,12 @@ npx --yes -p github:LeeJinMing/TryStack trystack up louislam/uptime-kuma
 trystack ps louislam/uptime-kuma
 ```
 
+## Portal (online)
+
+After you enable GitHub Pages (Settings → Pages → Source: GitHub Actions), the Portal will be available at:
+
+`https://leejinming.github.io/TryStack/`
+
 ## Registry (optional)
 
 ```bash
@@ -58,6 +64,12 @@ trystack doctor louislam/uptime-kuma --json
 - Add a browser extension that shows a “Try locally” button on GitHub repo pages (opens the Portal with repo pre-filled).
 - Add GitHub App automation for maintainers (PR checks / comments / status), while still keeping everything running locally.
 
+## Version pinning (recommended)
+
+For reproducible runs, pin to a tag once we publish releases (example):
+
+`npx --yes -p github:LeeJinMing/TryStack#v0.0.1 trystack up louislam/uptime-kuma`
+
 ## Repository layout
 
 - `recipes/`: public recipes (by project / variant)
@@ -84,6 +96,7 @@ Portal 仅提交源码与脚本；`portal/dist/` 与 `portal/node_modules/` 不�
 ## 提交规范
 
 可提交（源码与配置）：
+
 - `recipes/**`
 - `spec/**`
 - `cli/**`
@@ -92,6 +105,7 @@ Portal 仅提交源码与脚本；`portal/dist/` 与 `portal/node_modules/` 不�
 - `README.md`
 
 不可提交（本地生成/缓存）：
+
 - `**/node_modules/`
 - `**/dist/`
 - `.env*`

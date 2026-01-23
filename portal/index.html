@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TryStack — Try locally</title>
-    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="./src/style.css" />
   </head>
   <body>
     <div class="page">
@@ -32,10 +32,19 @@ trystack ps louislam/uptime-kuma</code></pre>
             <h2>Try a repo</h2>
           </div>
           <div class="try-row">
-            <input id="repoInput" class="input" type="text" placeholder="owner/repo (e.g. louislam/uptime-kuma)" />
+            <input
+              id="repoInput"
+              class="input"
+              type="text"
+              placeholder="owner/repo or GitHub URL (e.g. louislam/uptime-kuma or https://github.com/louislam/uptime-kuma)"
+            />
             <button id="repoGo" class="btn primary" type="button">Find</button>
           </div>
           <div id="repoResult" class="try-result muted"></div>
+          <p class="note muted">
+            Want to add a recipe? See
+            <a href="https://github.com/LeeJinMing/TryStack/blob/main/spec/recipe-spec.md" target="_blank" rel="noreferrer">recipe spec</a>.
+          </p>
         </section>
 
         <section id="recipes">
@@ -77,6 +86,6 @@ trystack ps louislam/uptime-kuma</code></pre>
       </form>
     </dialog>
 
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="./src/main.js"></script>
   </body>
 </html>
