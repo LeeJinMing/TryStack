@@ -16,6 +16,15 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# Cursor / IDE (local only)
+.cursor/
+.vscode/
+.idea/
+*.code-workspace
+
+# cli legacy entry (should not be edited/committed)
+cli/index.js
+
 # OS
 Thumbs.db
 Desktop.ini

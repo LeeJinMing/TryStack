@@ -1,0 +1,12 @@
+{
+  "name": "trystack-portal",
+  "version": "0.0.1",
+  "private": true,
+  "description": "TryStack portal: minimal entry point for Try locally.",
+  "license": "MIT",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node dev.js",
+    "start": "node dev.js"
+  }
+}

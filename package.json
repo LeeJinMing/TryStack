@@ -1,0 +1,14 @@
+{
+  "name": "trystack",
+  "version": "0.0.1",
+  "private": true,
+  "description": "One-click try-locally entry point for open-source apps (recipes + CLI + CI).",
+  "license": "MIT",
+  "bin": {
+    "trystack": "bin/trystack.js"
+  },
+  "dependencies": {
+    "yaml": "^2.8.0"
+  }
+}
+

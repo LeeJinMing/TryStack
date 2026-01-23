@@ -1,24 +1,97 @@
-# GitHubUI Recipes (Try locally)
+# TryStack
 
-为**自托管开源应用**提供可验证、可复用的本地一键启动 recipes，帮助维护者降低上手与支持成本（减少重复 issue），并让评估者几分钟内跑起来看到 UI。
+**TryStack** gives open-source projects a **one-click “try locally” entry point**.
+It uses a verified **recipe** (Docker Compose) so anyone can run an app locally and open its UI in minutes.
 
-## Try locally
+## Quick start (3 lines)
 
-输入任意 GitHub 仓库（A0/A1 优先），获取可用 recipe 并在本地用 Docker 启动：
+```bash
+npx --yes -p github:LeeJinMing/TryStack trystack up louislam/uptime-kuma
+# Or: trystack up filebrowser/filebrowser
+trystack ps louislam/uptime-kuma
+```
 
-- Portal（后续）：`/try/<owner>/<repo>`
-- CLI（后续，npx）：`npx githubui-try <owner>/<repo>`
+## Registry (optional)
 
-## For maintainers
+```bash
+# Prefer remote registry recipes (for validation)
+trystack up louislam/uptime-kuma --prefer-registry
 
-- **减少支持成本**：把“怎么跑起来”标准化成 recipe + CI 验证
-- **可控可审计**：公共 recipes/规范/验证模板永久开源，支持版本范围清晰
-- **社区协作**：用 PR 贡献与更新 recipes；失败会给出可复现日志与缺口清单
+# Use a custom registry repo and ref
+trystack up louislam/uptime-kuma --registry owner/recipes-repo --registry-ref main
+```
 
-## Repo structure
+## CLI tips
 
-- `recipes/`: 公共 recipes（按项目/版本组织）
-- `spec/`: recipe 规范与分诊规则
-- `.github/workflows/`: CI 验证模板（PR 必须通过）
-- `cli/`: npx CLI（后续）
-- `portal/`: Portal（后续）
+```bash
+# JSON output for scripts
+trystack list louislam/uptime-kuma --json
+
+# Validate all local recipes (for CI)
+trystack verify-recipes --json
+
+# Doctor includes compose config validation and UI precheck
+trystack doctor louislam/uptime-kuma
+trystack doctor louislam/uptime-kuma --json
+```
+
+`list --json` 输出字段：`repo` / `source` / `localPath` / `registry` / `recipeIds`。
+
+退出码：`0` ok，`1` usage，`2` not found，`3` UI timeout，`4` port in use，`5` registry error，`6` recipe invalid，`7` required env missing，`127` docker/compose missing。
+
+## What you get
+
+- **For evaluators**: “does it work?” in minutes, not hours of setup
+- **For maintainers**: fewer “how do I run this?” issues (recipes + CI verification)
+- **For contributors**: add/maintain recipes via PR, with automated validation
+
+## How it works (plain language)
+
+- Pick an app from the Portal (or README).
+- Copy one command and run it.
+- The app starts on your machine, and you open its page in your browser.
+- If something goes wrong, you run `trystack doctor ...` to see what is missing and how to fix it.
+
+## Roadmap (later)
+
+- Add a small “Try locally” badge maintainers can paste into their GitHub README (links to the Portal).
+- Add a browser extension that shows a “Try locally” button on GitHub repo pages (opens the Portal with repo pre-filled).
+- Add GitHub App automation for maintainers (PR checks / comments / status), while still keeping everything running locally.
+
+## Repository layout
+
+- `recipes/`: public recipes (by project / variant)
+- `cli/`: CLI package (`trystack-cli`) — local dev/debug
+- `spec/`: recipe spec (`recipe.yaml`) and examples
+- `.github/workflows/`: CI verification template for recipes
+- `portal/`: minimal web portal (entry + docs)
+
+## Portal usage
+
+```bash
+cd portal
+npm install
+npm run dev
+```
+
+```bash
+npm run build
+node dev.js --dist
+```
+
+Portal 仅提交源码与脚本；`portal/dist/` 与 `portal/node_modules/` 不入库（已在 `.gitignore` 中忽略）。
+
+## 提交规范
+
+可提交（源码与配置）：
+- `recipes/**`
+- `spec/**`
+- `cli/**`
+- `portal/**`（不含构建产物）
+- `.github/workflows/**`
+- `README.md`
+
+不可提交（本地生成/缓存）：
+- `**/node_modules/`
+- `**/dist/`
+- `.env*`

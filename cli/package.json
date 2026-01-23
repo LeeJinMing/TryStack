@@ -1,11 +1,14 @@
 {
-  "name": "githubui-try",
+  "name": "trystack-cli",
   "version": "0.0.1",
   "private": true,
-  "description": "Try locally: resolve repo -> recipe -> docker compose up",
+  "description": "TryStack CLI: resolve repo -> recipe -> docker compose up",
   "license": "MIT",
+  "scripts": {
+    "test": "node --test"
+  },
   "bin": {
-    "githubui-try": "index.js"
+    "trystack-cli": "entry.js"
   },
   "dependencies": {
     "yaml": "^2.8.0"

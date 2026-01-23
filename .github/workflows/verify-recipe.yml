@@ -16,6 +16,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Portal build
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd portal
+          npm ci
+          npm run build
+
+      - name: CLI tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cli
+          npm ci
+          npm test
+
+      - name: CLI verify-recipes (no docker)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cli
+          node entry.js verify-recipes --json
+
       - name: Install python deps
         shell: bash
         run: |

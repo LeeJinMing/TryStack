@@ -1,0 +1,62 @@
+/* eslint-disable no-console */
+const { DEFAULT_REGISTRY, EXIT } = require("./lib/constants");
+
+function usage() {
+  console.log(
+    [
+      "trystack [command] <owner/repo|repo-url> [options]",
+      "",
+      "Examples:",
+      "  trystack up louislam/uptime-kuma",
+      "  trystack ps louislam/uptime-kuma",
+      "  trystack logs louislam/uptime-kuma --tail 200",
+      "  trystack down louislam/uptime-kuma",
+      "  trystack list louislam/uptime-kuma",
+      "",
+      "Back-compat (still works):",
+      "  trystack louislam/uptime-kuma",
+      "  trystack louislam/uptime-kuma --list",
+      "",
+      "Commands:",
+      "  up     Start with docker compose up -d (default)",
+      "  ps     Show docker compose ps",
+      "  logs   Show docker compose logs (supports --tail N, --follow)",
+      "  stop   Stop services (docker compose stop)",
+      "  down   Stop and remove resources (docker compose down)",
+      "  list   List available recipeIds for this repo",
+      "  print  Print instructions only (no docker)",
+      "  doctor Diagnose environment and project status",
+      "  verify-recipes  Validate all local recipes under recipes/",
+      "",
+      "Options:",
+      "  --recipe <id>   Choose recipeId (default: prefer 'default')",
+      "  --project <name> Override docker compose project name",
+      `  --registry <owner/repo>   Fetch recipes from a GitHub registry repo (default: ${DEFAULT_REGISTRY.owner}/${DEFAULT_REGISTRY.repo})`,
+      "  --registry-ref <ref>      Git ref for registry (default: main)",
+      "  --cache-dir <path>        Cache directory for downloaded recipes (default: ~/.githubui-cache)",
+      "  --prefer-registry         Prefer registry recipes even if local exists (useful for validating remote)",
+      "  --no-run        Print instructions only (do not run docker)",
+      "  --no-open       Do not open the UI in browser",
+      "  --run           (legacy) same as default behavior",
+      "  --open          (legacy) same as default behavior",
+      "  --json          (list/doctor/verify-recipes) output machine-readable JSON",
+      "  --recipes-dir <path>  (verify-recipes) override recipes root dir",
+      "",
+      "Exit codes:",
+      "  0   ok",
+      "  1   usage / invalid input",
+      "  2   recipe not found / resolve failed",
+      "  3   UI not ready",
+      "  4   port conflict (no free port)",
+      "  5   registry/network error",
+      "  6   recipe invalid",
+      "  7   required env missing",
+      "  127 docker or compose missing",
+    ].join("\n"),
+  );
+}
+
+module.exports = {
+  usage,
+  EXIT,
+};
