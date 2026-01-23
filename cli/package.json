@@ -1,0 +1,14 @@
+{
+  "name": "githubui-try",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Try locally: resolve repo -> recipe -> docker compose up",
+  "license": "MIT",
+  "bin": {
+    "githubui-try": "index.js"
+  },
+  "dependencies": {
+    "yaml": "^2.8.0"
+  }
+}
+
