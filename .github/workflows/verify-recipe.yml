@@ -111,7 +111,11 @@ jobs:
             fi
 
             # Create isolated compose project name
-            proj="ghui_$(echo "$dir" | tr '/.' '__')_${GITHUB_RUN_ID}"
+            # docker compose project name constraints:
+            # - lowercase alphanumeric, hyphen, underscore
+            # - must start with a letter or number
+            # Our recipe paths may contain dots, slashes, and uppercase letters (e.g. PrivateBin).
+            proj="ghui_$(echo "$dir" | tr '/.' '__' | tr '[:upper:]' '[:lower:]')_${GITHUB_RUN_ID}"
 
             # Bring up
             pushd "$dir" >/dev/null
