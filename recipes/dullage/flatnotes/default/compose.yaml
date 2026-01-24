@@ -2,6 +2,9 @@ services:
   flatnotes:
     image: dullage/flatnotes:latest
     restart: unless-stopped
+    environment:
+      # Disable auth for local evaluation (avoids required FLATNOTES_USERNAME/PASSWORD).
+      FLATNOTES_AUTH_TYPE: "none"
     ports:
       - "8103:8080"
 

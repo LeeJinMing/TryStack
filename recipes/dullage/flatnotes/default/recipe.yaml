@@ -26,11 +26,13 @@ ui:
 
 env:
   required: []
-  optional: []
+  optional:
+    - FLATNOTES_AUTH_TYPE
 
 notes:
   setup: |
     No setup required. Open the UI and start writing notes.
+    This recipe sets `FLATNOTES_AUTH_TYPE=none` for local evaluation.
   limitations: |
     This recipe is for local evaluation (Try locally).
 

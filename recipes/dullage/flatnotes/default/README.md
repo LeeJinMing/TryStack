@@ -5,7 +5,7 @@ Simple, self-hosted note-taking app with Markdown support.
 ## Quick start
 
 ```bash
-npx --yes -p github:LeeJinMing/TryStack#v0.0.1 trystack up dullage/flatnotes
+npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack up dullage/flatnotes
 ```
 
 Open:
@@ -14,4 +14,4 @@ Open:
 
 ## Notes
 
-- This is intended for local evaluation (Try locally).
+- This recipe disables authentication for local evaluation.
