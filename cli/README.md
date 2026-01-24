@@ -46,6 +46,10 @@ node entry.js down louislam/uptime-kuma
 node entry.js doctor louislam/uptime-kuma
 node entry.js doctor louislam/uptime-kuma --json
 
+# (Windows) Portal one-click (trystack://) integration
+node entry.js protocol install
+node entry.js protocol uninstall
+
 # Validate all local recipes (for CI; no docker required)
 node entry.js verify-recipes --json
 ```

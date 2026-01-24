@@ -100,6 +100,21 @@ function parseProtocolUri(raw) {
   };
 }
 
+function hasControlChars(s) {
+  return /[\u0000-\u001F\u007F]/.test(String(s || ""));
+}
+
+function isSafeSegment(s, maxLen = 80) {
+  const v = String(s || "");
+  return v.length > 0 && v.length <= maxLen && /^[A-Za-z0-9_.-]+$/.test(v);
+}
+
+function isSafeRef(s, maxLen = 128) {
+  const v = String(s || "");
+  // Allow typical git refs: main, feature/x, tags/v1.2.3
+  return v.length > 0 && v.length <= maxLen && /^[A-Za-z0-9_.\-/]+$/.test(v);
+}
+
 async function promptYesNo(question) {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   try {
@@ -184,10 +199,40 @@ async function protocolRun({ args }) {
     return EXIT.USAGE;
   }
 
+  if (String(rawUri).length > 2048 || hasControlChars(rawUri)) {
+    console.error("Invalid URI (too long or contains control characters).");
+    return EXIT.USAGE;
+  }
+
   const yes = args.includes("--yes");
   const parsed = parseProtocolUri(rawUri);
   if (!parsed) {
     console.error(`Invalid URI: ${rawUri}`);
+    return EXIT.USAGE;
+  }
+
+  if (String(parsed.repoRaw || "").length > 200 || hasControlChars(parsed.repoRaw)) {
+    console.error("Invalid repo parameter.");
+    return EXIT.USAGE;
+  }
+
+  if (parsed.recipeId && !isSafeSegment(parsed.recipeId, 80)) {
+    console.error(`Invalid recipe parameter: ${parsed.recipeId}`);
+    return EXIT.USAGE;
+  }
+
+  if (parsed.project && (!isSafeSegment(parsed.project, 60) || parsed.project.toLowerCase().startsWith("docker"))) {
+    console.error(`Invalid project parameter: ${parsed.project}`);
+    return EXIT.USAGE;
+  }
+
+  if (parsed.registry && !/^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(parsed.registry)) {
+    console.error(`Invalid registry parameter: ${parsed.registry}`);
+    return EXIT.USAGE;
+  }
+
+  if (parsed.registryRef && !isSafeRef(parsed.registryRef, 128)) {
+    console.error(`Invalid registryRef parameter: ${parsed.registryRef}`);
     return EXIT.USAGE;
   }
 
@@ -209,7 +254,10 @@ async function protocolRun({ args }) {
   const forwardedArgs = [];
   if (parsed.recipeId) forwardedArgs.push("--recipe", parsed.recipeId);
   if (parsed.project) forwardedArgs.push("--project", parsed.project);
-  if (parsed.cacheDir) forwardedArgs.push("--cache-dir", parsed.cacheDir);
+  if (parsed.cacheDir) {
+    // Intentionally not supported via URL for safety.
+    console.error("Warning: cacheDir is ignored when provided via trystack:// URI.");
+  }
   if (parsed.registry) forwardedArgs.push("--registry", parsed.registry);
   if (parsed.registryRef) forwardedArgs.push("--registry-ref", parsed.registryRef);
   if (parsed.preferRegistry) forwardedArgs.push("--prefer-registry");
@@ -225,6 +273,10 @@ async function protocolRun({ args }) {
     registryOptions,
   );
 
+  const summary = `action=${action} repo=${repo.owner}/${repo.repo} recipe=${ctx.recipeId} run=${
+    parsed.noRun ? "0" : "1"
+  } open=${parsed.noOpen ? "0" : "1"}${action === "doctor" ? ` json=${jsonOutput ? "1" : "0"}` : ""}`;
+
   console.log("TryStack one-click request:");
   console.log(`- uri: ${parsed.raw}`);
   console.log(`- action: ${action}`);
@@ -233,6 +285,7 @@ async function protocolRun({ args }) {
   console.log(`- run: ${parsed.noRun ? "no" : "yes"}`);
   console.log(`- open: ${parsed.noOpen ? "no" : "yes"}`);
   if (action === "doctor") console.log(`- json: ${jsonOutput ? "yes" : "no"}`);
+  console.log(`- summary: ${summary}`);
   console.log("");
 
   if (!yes) {
