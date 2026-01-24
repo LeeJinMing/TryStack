@@ -3,7 +3,7 @@ if (yearEl) {
   yearEl.textContent = String(new Date().getFullYear());
 }
 
-const NPX_PACKAGE = (typeof window !== "undefined" && window.TRYSTACK_NPX_PACKAGE) || "github:LeeJinMing/TryStack#v0.0.1";
+const NPX_PACKAGE = (typeof window !== "undefined" && window.TRYSTACK_NPX_PACKAGE) || "github:LeeJinMing/TryStack#v0.0.2";
 
 async function fetchJson(url) {
   const res = await fetch(url, { cache: "no-store" });
@@ -52,6 +52,85 @@ async function copyToClipboard(text) {
     window.prompt("Copy command:", text);
     return false;
   }
+}
+
+function downloadTextFile({ filename, content, mime = "text/plain;charset=utf-8" }) {
+  const name = String(filename || "download.txt").trim() || "download.txt";
+  const text = String(content ?? "");
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  // revoke after click so the download can start
+  setTimeout(() => URL.revokeObjectURL(url), 250);
+}
+
+function safeFileSegment(s) {
+  return String(s || "")
+    .replace(/[^A-Za-z0-9_.-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+function buildCmdScript(command) {
+  const cmd = String(command || "").trim();
+  return [
+    "@echo off",
+    "setlocal",
+    "echo.",
+    "echo TryStack (generated script). Review the command before running.",
+    "echo.",
+    `echo ${cmd.replace(/%/g, "%%")}`,
+    "echo.",
+    cmd,
+    "echo.",
+    "echo Done. Press any key to close.",
+    "pause >nul",
+    "",
+  ].join("\r\n");
+}
+
+function buildPs1Script(command) {
+  const cmd = String(command || "").trim();
+  return [
+    "# TryStack (generated script). Review the command before running.",
+    '$ErrorActionPreference = "Stop"',
+    "",
+    'Write-Host ""',
+    'Write-Host "Running:"',
+    `Write-Host ${JSON.stringify(cmd)}`,
+    'Write-Host ""',
+    "",
+    cmd,
+    "",
+    'Write-Host ""',
+    'Write-Host "Done."',
+    "",
+  ].join("\r\n");
+}
+
+function downloadRunScripts({ owner, repo, recipeId, command, prefix = "trystack" }) {
+  const o = safeFileSegment(owner);
+  const r = safeFileSegment(repo);
+  const rid = safeFileSegment(recipeId || "default") || "default";
+  const base = `${safeFileSegment(prefix)}-${o}-${r}-${rid}`;
+
+  downloadTextFile({
+    filename: `${base}.cmd`,
+    content: buildCmdScript(command),
+    mime: "application/octet-stream",
+  });
+
+  downloadTextFile({
+    filename: `${base}.ps1`,
+    content: buildPs1Script(command),
+    mime: "text/plain;charset=utf-8",
+  });
 }
 
 function parseRepoInput(raw) {
@@ -118,6 +197,42 @@ function renderRecipes(recipes, filterText) {
       await copyToClipboard(r.command);
     });
 
+    const dlBtn = el("button", { class: "btn", type: "button" }, []);
+    dlBtn.textContent = "Download script (.cmd/.ps1)";
+    dlBtn.addEventListener("click", () => {
+      downloadRunScripts({
+        owner: r.owner,
+        repo: r.repo,
+        recipeId: r.recipeId,
+        command: r.command,
+        prefix: "trystack-up",
+      });
+    });
+
+    const protoLink = el(
+      "a",
+      {
+        class: "btn",
+        href: `trystack://up?repo=${encodeURIComponent(`${r.owner}/${r.repo}`)}&recipe=${encodeURIComponent(
+          r.recipeId || "default",
+        )}`,
+      },
+      [],
+    );
+    protoLink.textContent = "Open (1-click)";
+
+    const doctorLink = el(
+      "a",
+      {
+        class: "btn",
+        href: `trystack://doctor?repo=${encodeURIComponent(`${r.owner}/${r.repo}`)}&recipe=${encodeURIComponent(
+          r.recipeId || "default",
+        )}`,
+      },
+      [],
+    );
+    doctorLink.textContent = "Doctor (1-click)";
+
     const readmeBtn = el("button", { class: "btn", type: "button" }, []);
     readmeBtn.textContent = "View README";
     readmeBtn.disabled = !r.readme;
@@ -131,7 +246,7 @@ function renderRecipes(recipes, filterText) {
     ghLink.textContent = "GitHub";
     if (!r.github) ghLink.setAttribute("aria-disabled", "true");
 
-    const actions = el("div", { class: "recipe-actions" }, [copyBtn, readmeBtn, ghLink]);
+    const actions = el("div", { class: "recipe-actions" }, [copyBtn, dlBtn, protoLink, doctorLink, readmeBtn, ghLink]);
 
     const card = el("div", { class: "recipe-card" }, [
       header,
@@ -184,12 +299,27 @@ async function initRecipes() {
           const scaffold = `npx --yes -p ${NPX_PACKAGE} trystack scaffold ${owner}/${repo}`;
           repoResult.innerHTML = `<div class="bad">No recipe found for <b>${owner}/${repo}</b> yet.</div>
             <div class="row muted">You (or the maintainer) can add one via a PR to this repo.</div>
-            <div class="row"><button id="repoScaffoldCopy" class="btn primary" type="button">Copy scaffold command</button></div>
+            <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button id="repoScaffoldCopy" class="btn primary" type="button">Copy scaffold command</button>
+              <button id="repoScaffoldDl" class="btn" type="button">Download scaffold script (.cmd/.ps1)</button>
+            </div>
             <div class="row"><a class="btn" href="${CONTRIBUTING_URL}" target="_blank" rel="noreferrer">How to add a recipe</a></div>`;
           const scaffoldBtn = document.getElementById("repoScaffoldCopy");
           if (scaffoldBtn) {
             scaffoldBtn.addEventListener("click", async () => {
               await copyToClipboard(scaffold);
+            });
+          }
+          const scaffoldDl = document.getElementById("repoScaffoldDl");
+          if (scaffoldDl) {
+            scaffoldDl.addEventListener("click", () => {
+              downloadRunScripts({
+                owner,
+                repo,
+                recipeId: "default",
+                command: scaffold,
+                prefix: "trystack-scaffold",
+              });
             });
           }
           return;
@@ -207,7 +337,12 @@ async function initRecipes() {
             </select>
           </div>
           <div class="row">
-            <button id="repoCopy" class="btn primary" type="button">Copy command</button>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button id="repoCopy" class="btn primary" type="button">Copy command</button>
+              <button id="repoDl" class="btn" type="button">Download script (.cmd/.ps1)</button>
+              <a id="repoOpen" class="btn" href="#" style="text-decoration:none;">Open (1-click)</a>
+              <a id="repoDoctor" class="btn" href="#" style="text-decoration:none;">Doctor (1-click)</a>
+            </div>
           </div>
         `;
 
@@ -222,6 +357,41 @@ async function initRecipes() {
           copy.addEventListener("click", async () => {
             await copyToClipboard(buildCmd());
           });
+        }
+        const dl = document.getElementById("repoDl");
+        if (dl) {
+          dl.addEventListener("click", () => {
+            downloadRunScripts({
+              owner,
+              repo,
+              recipeId: String(sel?.value || "default"),
+              command: buildCmd(),
+              prefix: "trystack-up",
+            });
+          });
+        }
+        const open1 = document.getElementById("repoOpen");
+        if (open1) {
+          const buildUri = () => {
+            const rid = String(sel?.value || "default");
+            const repoParam = encodeURIComponent(`${owner}/${repo}`);
+            const recipeParam = encodeURIComponent(rid);
+            return `trystack://up?repo=${repoParam}&recipe=${recipeParam}`;
+          };
+          open1.setAttribute("href", buildUri());
+          if (sel) sel.addEventListener("change", () => open1.setAttribute("href", buildUri()));
+        }
+
+        const doctor1 = document.getElementById("repoDoctor");
+        if (doctor1) {
+          const buildUri = () => {
+            const rid = String(sel?.value || "default");
+            const repoParam = encodeURIComponent(`${owner}/${repo}`);
+            const recipeParam = encodeURIComponent(rid);
+            return `trystack://doctor?repo=${repoParam}&recipe=${recipeParam}`;
+          };
+          doctor1.setAttribute("href", buildUri());
+          if (sel) sel.addEventListener("change", () => doctor1.setAttribute("href", buildUri()));
         }
       };
 

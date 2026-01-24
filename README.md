@@ -2,7 +2,7 @@
 
 English | [Chinese](README.zh-CN.md)
 
-Latest release: `v0.0.1` (`https://github.com/LeeJinMing/TryStack/releases/tag/v0.0.1`)
+Latest release: `v0.0.2` (`https://github.com/LeeJinMing/TryStack/releases/tag/v0.0.2`)
 
 **TryStack** gives open-source projects a **one-click “try locally” entry point**.
 It uses a verified **recipe** (Docker Compose) so anyone can run an app locally and open its UI in minutes.
@@ -10,9 +10,9 @@ It uses a verified **recipe** (Docker Compose) so anyone can run an app locally 
 ## Quick start (3 lines)
 
 ```bash
-npx --yes -p github:LeeJinMing/TryStack#v0.0.1 trystack up louislam/uptime-kuma
+npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack up louislam/uptime-kuma
 # Or: trystack up filebrowser/filebrowser
-npx --yes -p github:LeeJinMing/TryStack#v0.0.1 trystack ps louislam/uptime-kuma
+npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack ps louislam/uptime-kuma
 ```
 
 ## Portal (online)
@@ -72,7 +72,7 @@ Exit codes: `0` ok, `1` usage, `2` not found, `3` UI timeout, `4` port in use, `
 
 For reproducible runs, pin to a tag (example):
 
-`npx --yes -p github:LeeJinMing/TryStack#v0.0.1 trystack up louislam/uptime-kuma`
+`npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack up louislam/uptime-kuma`
 
 ## Repository layout
 

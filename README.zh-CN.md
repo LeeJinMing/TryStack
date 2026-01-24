@@ -2,15 +2,17 @@
 
 [English](README.md) | 中文
 
+最新版本：`v0.0.2`（`https://github.com/LeeJinMing/TryStack/releases/tag/v0.0.2`）
+
 **TryStack** 为开源项目提供一个 **“一键本地试用（try locally）”入口**。
 通过经过验证的 **recipe**（Docker Compose），让任何人都能在几分钟内把应用跑起来并打开 UI。
 
 ## 快速开始（3 行）
 
 ```bash
-npx --yes -p github:LeeJinMing/TryStack trystack up louislam/uptime-kuma
+npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack up louislam/uptime-kuma
 # 或：trystack up filebrowser/filebrowser
-trystack ps louislam/uptime-kuma
+npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack ps louislam/uptime-kuma
 ```
 
 ## Portal（在线入口）
@@ -70,7 +72,7 @@ trystack doctor louislam/uptime-kuma --json
 
 为了可复现运行，建议 pin 到 tag（示例）：
 
-`npx --yes -p github:LeeJinMing/TryStack#v0.0.1 trystack up louislam/uptime-kuma`
+`npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack up louislam/uptime-kuma`
 
 ## 仓库结构
 

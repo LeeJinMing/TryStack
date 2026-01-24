@@ -13,7 +13,7 @@
         <p>One-click “try locally” entry point for open-source apps.</p>
         <div class="hero-actions">
           <a class="btn primary" href="https://github.com/LeeJinMing/TryStack">GitHub</a>
-          <a class="btn" href="https://github.com/LeeJinMing/TryStack/releases/tag/v0.0.1" target="_blank" rel="noreferrer">Release v0.0.1</a>
+          <a class="btn" href="https://github.com/LeeJinMing/TryStack/releases/tag/v0.0.2" target="_blank" rel="noreferrer">Release v0.0.2</a>
           <a class="btn" href="#try-locally">Try locally</a>
         </div>
       </header>
@@ -21,11 +21,16 @@
       <main class="content">
         <section id="try-locally">
           <h2>Try locally</h2>
-          <p class="note muted">Commands are pinned to <code>v0.0.1</code> for reproducible runs.</p>
-          <pre><code>npx --yes -p github:LeeJinMing/TryStack#v0.0.1 trystack up louislam/uptime-kuma
+          <p class="note muted">Commands are pinned to <code>v0.0.2</code> for reproducible runs.</p>
+          <pre><code>npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack up louislam/uptime-kuma
 trystack ps louislam/uptime-kuma</code></pre>
           <p class="note">
             Uses verified recipes to bring up a UI locally with Docker Compose.
+          </p>
+          <p class="note muted">
+            One-click (Windows): run
+            <code>npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack protocol install</code>
+            once, then use “Open (1-click)” on recipe cards.
           </p>
         </section>
 
@@ -59,7 +64,7 @@ trystack ps louislam/uptime-kuma</code></pre>
           </div>
           <div id="recipesList" class="recipes-grid"></div>
           <p class="note muted">
-            Tip: Click “Copy command”, paste in your terminal, then open the printed URL in your browser.
+            Tip: You can click “Copy command”, or download a `.cmd/.ps1` script to run locally.
           </p>
         </section>
 
@@ -90,7 +95,7 @@ trystack ps louislam/uptime-kuma</code></pre>
 
     <script>
       // Used by Portal UI when generating commands (e.g. scaffold suggestions).
-      window.TRYSTACK_NPX_PACKAGE = "github:LeeJinMing/TryStack#v0.0.1";
+      window.TRYSTACK_NPX_PACKAGE = "github:LeeJinMing/TryStack#v0.0.2";
     </script>
     <script type="module" src="./src/main.js"></script>
   </body>

@@ -9,6 +9,7 @@ const { verifyRecipesCommand } = require("./commands/verify-recipes");
 const { scaffoldCommand, usageScaffold } = require("./commands/scaffold");
 const { manageCommand } = require("./commands/manage");
 const { runCommand } = require("./commands/run");
+const { protocolCommand, usageProtocol } = require("./commands/protocol");
 
 async function main() {
   const argv = process.argv.slice(2);
@@ -34,6 +35,16 @@ async function main() {
   const open = !noOpen;
 
   const command = legacyList ? "list" : rawCommand;
+  if (command === "protocol") {
+    const sub = args[0];
+    if (!sub || args.includes("-h") || args.includes("--help")) {
+      usageProtocol();
+      process.exit(EXIT.OK);
+    }
+    const code = await protocolCommand({ args });
+    process.exit(code);
+  }
+
   if (command === "verify-recipes") {
     console.log(`Command: ${command}`);
     console.log("");
