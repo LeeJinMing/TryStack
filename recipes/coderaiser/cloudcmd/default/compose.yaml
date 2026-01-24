@@ -1,0 +1,7 @@
+services:
+  cloudcmd:
+    image: coderaiser/cloudcmd:latest
+    restart: unless-stopped
+    ports:
+      - "8001:8000"
+

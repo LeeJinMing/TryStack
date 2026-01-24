@@ -1,0 +1,7 @@
+services:
+  shaarli:
+    image: ghcr.io/shaarli/shaarli:latest
+    restart: unless-stopped
+    ports:
+      - "8104:80"
+

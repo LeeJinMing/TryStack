@@ -1,0 +1,7 @@
+services:
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    ports:
+      - "8101:8080"
+

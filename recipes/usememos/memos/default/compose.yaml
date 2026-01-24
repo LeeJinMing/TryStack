@@ -1,0 +1,7 @@
+services:
+  memos:
+    image: ghcr.io/usememos/memos:latest
+    restart: unless-stopped
+    ports:
+      - "8108:5230"
+

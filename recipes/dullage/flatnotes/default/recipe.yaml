@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: dullage
+  repo: flatnotes
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: flatnotes
+    protocol: http
+    hostPort: 8103
+    containerPort: 8080
+
+ui:
+  url: "http://localhost:8103"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    No setup required. Open the UI and start writing notes.
+  limitations: |
+    This recipe is for local evaluation (Try locally).
+

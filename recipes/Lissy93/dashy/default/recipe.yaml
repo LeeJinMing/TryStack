@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: Lissy93
+  repo: dashy
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: dashy
+    protocol: http
+    hostPort: 8106
+    containerPort: 8080
+
+ui:
+  url: "http://localhost:8106"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    No setup required. Open the UI and customize your dashboard.
+  limitations: |
+    This recipe is for local evaluation (Try locally).
+

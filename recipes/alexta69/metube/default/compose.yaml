@@ -1,0 +1,7 @@
+services:
+  metube:
+    image: ghcr.io/alexta69/metube:latest
+    restart: unless-stopped
+    ports:
+      - "8107:8081"
+

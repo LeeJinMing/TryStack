@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: szabodanika
+  repo: microbin
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: microbin
+    protocol: http
+    hostPort: 8102
+    containerPort: 8080
+
+ui:
+  url: "http://localhost:8102"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    No setup required. Open the UI and create a paste.
+  limitations: |
+    This recipe is for local evaluation (Try locally).
+

@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: shaarli
+  repo: shaarli
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: shaarli
+    protocol: http
+    hostPort: 8104
+    containerPort: 80
+
+ui:
+  url: "http://localhost:8104"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    On first run, Shaarli will ask you to create an admin password.
+  limitations: |
+    This recipe is for local evaluation (Try locally).
+

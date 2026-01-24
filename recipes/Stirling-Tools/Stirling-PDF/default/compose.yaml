@@ -1,0 +1,7 @@
+services:
+  stirling-pdf:
+    image: stirlingtools/stirling-pdf:latest
+    restart: unless-stopped
+    ports:
+      - "8109:8080"
+

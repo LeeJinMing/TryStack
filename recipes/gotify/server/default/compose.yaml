@@ -1,0 +1,7 @@
+services:
+  gotify:
+    image: gotify/server:latest
+    restart: unless-stopped
+    ports:
+      - "8105:80"
+

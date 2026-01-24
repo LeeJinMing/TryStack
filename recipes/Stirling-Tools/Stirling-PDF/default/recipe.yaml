@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: Stirling-Tools
+  repo: Stirling-PDF
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: stirling-pdf
+    protocol: http
+    hostPort: 8109
+    containerPort: 8080
+
+ui:
+  url: "http://localhost:8109"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    No setup required. Open the UI and start using the PDF tools.
+  limitations: |
+    This recipe is for local evaluation (Try locally).
+

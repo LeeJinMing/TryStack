@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: gotify
+  repo: server
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: gotify
+    protocol: http
+    hostPort: 8105
+    containerPort: 80
+
+ui:
+  url: "http://localhost:8105"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    On first run, use the default credentials shown on the login page.
+  limitations: |
+    This recipe is for local evaluation (Try locally).
+

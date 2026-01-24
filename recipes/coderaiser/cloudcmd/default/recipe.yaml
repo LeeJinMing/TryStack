@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: coderaiser
+  repo: cloudcmd
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: cloudcmd
+    protocol: http
+    hostPort: 8001
+    containerPort: 8000
+
+ui:
+  url: "http://localhost:8001"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    No setup required. Open the UI and start browsing files.
+  limitations: |
+    This recipe is for local evaluation (Try locally).
+

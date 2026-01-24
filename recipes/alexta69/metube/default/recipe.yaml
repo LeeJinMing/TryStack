@@ -1,0 +1,36 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: alexta69
+  repo: metube
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: metube
+    protocol: http
+    hostPort: 8107
+    containerPort: 8081
+
+ui:
+  url: "http://localhost:8107"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    No setup required. Open the UI and paste a video URL.
+  limitations: |
+    This recipe is for local evaluation (Try locally).
+
