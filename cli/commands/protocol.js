@@ -51,7 +51,11 @@ function buildWindowsHandlerCommand({ pkg }) {
   const p = String(pkg || "").trim();
   // Use cmd.exe /k so the console stays open after the run finishes.
   // "%1" is substituted by Windows with the clicked URI.
-  return `cmd.exe /d /s /k "npx --yes -p ${p} trystack protocol run \\"%1\\""`;
+  //
+  // IMPORTANT (Windows cmd quoting):
+  // Do NOT use backslash-escaped quotes (\"), cmd.exe does not treat backslash as an escape.
+  // We keep the command unwrapped and only quote %1 so `&` inside the URI is not treated as a command separator.
+  return `cmd.exe /d /s /k npx --yes -p ${p} trystack protocol run --yes "%1"`;
 }
 
 function parseProtocolUri(raw) {
@@ -133,7 +137,8 @@ async function protocolInstall({ args }) {
   }
 
   const scheme = (getArgValue(args, "--scheme") || "trystack").trim();
-  const pkg = (getArgValue(args, "--package") || "github:LeeJinMing/TryStack#v0.0.2").trim();
+  // Default to main because tags may not exist yet.
+  const pkg = (getArgValue(args, "--package") || "github:LeeJinMing/TryStack#main").trim();
   const dryRun = args.includes("--dry-run");
   if (!scheme || !/^[a-zA-Z][a-zA-Z0-9+\-.]*$/.test(scheme)) {
     console.error(`Invalid --scheme: ${scheme}`);
@@ -192,7 +197,14 @@ async function protocolUninstall({ args }) {
 }
 
 async function protocolRun({ args }) {
-  const rawUri = args.find((a) => !a.startsWith("-")) || null;
+  const rawUri0 = args.find((a) => !a.startsWith("-")) || null;
+  // Some Windows shells / browsers may pass the URI with surrounding quotes (including “smart quotes”).
+  const rawUri = rawUri0
+    ? String(rawUri0)
+        .trim()
+        .replace(/^[\"'\u201C\u201D\u2018\u2019]+/, "")
+        .replace(/[\"'\u201C\u201D\u2018\u2019]+$/, "")
+    : null;
   if (!rawUri) {
     console.error("Missing URI.");
     usageProtocol();

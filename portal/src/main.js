@@ -4,7 +4,7 @@ if (yearEl) {
 }
 
 const DEFAULT_NPX_PACKAGE =
-  (typeof window !== "undefined" && window.TRYSTACK_NPX_PACKAGE) || "github:LeeJinMing/TryStack#v0.0.2";
+  (typeof window !== "undefined" && window.TRYSTACK_NPX_PACKAGE) || "github:LeeJinMing/TryStack#main";
 
 let currentNpxPackage = DEFAULT_NPX_PACKAGE;
 let currentReleaseTag = null; // e.g. "v0.0.2"
@@ -28,7 +28,7 @@ function setNpxPackage({ npxPackage, tag }) {
 }
 
 function updatePinnedUi() {
-  const tag = currentReleaseTag || parseTagFromNpxPackage(getNpxPackage()) || "v0.0.2";
+  const tag = currentReleaseTag || parseTagFromNpxPackage(getNpxPackage()) || "main";
   const releaseLink = document.getElementById("releaseLink");
   const releaseTag = document.getElementById("releaseTag");
   const pinnedTag = document.getElementById("pinnedTag");
@@ -37,13 +37,19 @@ function updatePinnedUi() {
 
   if (releaseTag) releaseTag.textContent = tag;
   if (pinnedTag) pinnedTag.textContent = tag;
-  if (releaseLink) releaseLink.setAttribute("href", `https://github.com/LeeJinMing/TryStack/releases/tag/${tag}`);
+  if (releaseLink) {
+    const isSemver = /^v\d+\.\d+\.\d+/.test(tag);
+    releaseLink.setAttribute(
+      "href",
+      isSemver ? `https://github.com/LeeJinMing/TryStack/releases/tag/${tag}` : "https://github.com/LeeJinMing/TryStack",
+    );
+  }
 
   if (tryLocallyCmd) {
     tryLocallyCmd.textContent = `npx --yes -p github:LeeJinMing/TryStack#${tag} trystack up louislam/uptime-kuma\ntrystack ps louislam/uptime-kuma`;
   }
   if (protocolInstallInline) {
-    protocolInstallInline.textContent = `npx --yes -p github:LeeJinMing/TryStack#${tag} trystack protocol install`;
+    protocolInstallInline.textContent = `npx --yes -p github:LeeJinMing/TryStack#${tag} trystack protocol install --package github:LeeJinMing/TryStack#${tag}`;
   }
 }
 
