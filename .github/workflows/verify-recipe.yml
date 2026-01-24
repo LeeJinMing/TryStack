@@ -41,6 +41,7 @@ jobs:
           cd portal
           npm ci
           npm run build
+          node -e "const fs=require('fs'); const html=fs.readFileSync('dist/index.html','utf8'); if(!html.includes('src/style.css?v=') || !html.includes('src/main.js?v=')){ console.error('cache-busting missing in dist/index.html'); process.exit(1);} console.log('cache-busting ok');"
 
       - name: CLI tests
         shell: bash
@@ -49,6 +50,13 @@ jobs:
           cd cli
           npm ci
           npm test
+
+      - name: CLI protocol smoke (no docker)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cli
+          node entry.js protocol run --yes "trystack://print?repo=louislam/uptime-kuma&recipe=default"
 
       - name: CLI verify-recipes (no docker)
         shell: bash

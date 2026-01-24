@@ -21,6 +21,26 @@ npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack ps louislam/uptime-kuma
 
 `https://leejinming.github.io/TryStack/`
 
+## Windows 一键入口（可选）
+
+Portal 可以通过自定义 `trystack://` 协议提供 **一键按钮**（仅 Windows）。
+
+```bash
+# 安装 URL 协议处理器（当前用户）
+npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack protocol install
+```
+
+卸载：
+
+```bash
+npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack protocol uninstall
+```
+
+说明：
+
+- 协议处理器在执行前会 **要求确认**，避免误触直接执行。
+- 如果 Portal 显示旧界面，请强制刷新（Ctrl+F5）或用无痕窗口打开。
+
 ## Registry（可选）
 
 ```bash

@@ -21,6 +21,26 @@ After you enable GitHub Pages (Settings → Pages → Source: GitHub Actions), t
 
 `https://leejinming.github.io/TryStack/`
 
+## Windows one-click (optional)
+
+Portal can offer **one-click** buttons via a custom `trystack://` URL scheme (Windows only).
+
+```bash
+# Install URL scheme handler (current user)
+npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack protocol install
+```
+
+Uninstall:
+
+```bash
+npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack protocol uninstall
+```
+
+Notes:
+
+- The handler **asks for confirmation** before running anything.
+- If the Portal UI looks outdated, do a hard refresh (Ctrl+F5) or open an incognito window.
+
 ## Registry (optional)
 
 ```bash
