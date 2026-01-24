@@ -1,4 +1,17 @@
-const COMMANDS = new Set(["up", "ps", "logs", "stop", "down", "list", "print", "doctor", "verify-recipes", "scaffold", "protocol"]);
+const COMMANDS = new Set([
+  "up",
+  "ps",
+  "logs",
+  "stop",
+  "down",
+  "list",
+  "print",
+  "doctor",
+  "verify-recipes",
+  "verify-policy",
+  "scaffold",
+  "protocol",
+]);
 const DEFAULT_REGISTRY = { owner: "LeeJinMing", repo: "TryStack", ref: "main" };
 const EXIT = Object.freeze({
   OK: 0,

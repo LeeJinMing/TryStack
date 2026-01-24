@@ -52,6 +52,14 @@ node entry.js protocol uninstall
 
 # Validate all local recipes (for CI; no docker required)
 node entry.js verify-recipes --json
+
+# Validate recipes against policy (static; no docker required)
+node entry.js verify-policy --mode community --json
+node entry.js verify-policy --mode verified --json
+
+# (Optional) Use BYOK AI to scaffold files (requires OPENAI_API_KEY)
+# - OpenAI compatible; can point to a custom gateway via --ai-base-url
+node entry.js scaffold filebrowser/filebrowser --ai --policy-mode community
 ```
 
 ## list --json output

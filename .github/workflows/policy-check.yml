@@ -1,0 +1,53 @@
+name: Policy Check
+
+on:
+  pull_request:
+    paths:
+      - "recipes/**"
+      - "docs/policies/**"
+      - "cli/**"
+
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install CLI deps
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cli
+          npm ci
+
+      - name: Policy (community mode)
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cli
+          node entry.js verify-policy --mode community --json
+
+      - name: Policy (verified mode) - promotion PR only
+        if: contains(github.event.pull_request.body, '<!-- promotion:verified -->') && (github.event.pull_request.author_association == 'OWNER' || github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR')
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cli
+          node entry.js verify-policy --mode verified --json
+
+      - name: Reject promotion from non-members
+        if: contains(github.event.pull_request.body, '<!-- promotion:verified -->') && !(github.event.pull_request.author_association == 'OWNER' || github.event.pull_request.author_association == 'MEMBER' || github.event.pull_request.author_association == 'COLLABORATOR')
+        shell: bash
+        run: |
+          echo "Promotion to verified is restricted to org members/collaborators."
+          echo "author_association=${{ github.event.pull_request.author_association }}"
+          exit 1
+

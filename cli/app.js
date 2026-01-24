@@ -6,6 +6,7 @@ const { usage } = require("./usage");
 const { listCommand } = require("./commands/list");
 const { doctorCommand } = require("./commands/doctor");
 const { verifyRecipesCommand } = require("./commands/verify-recipes");
+const { verifyPolicyCommand } = require("./commands/verify-policy");
 const { scaffoldCommand, usageScaffold } = require("./commands/scaffold");
 const { manageCommand } = require("./commands/manage");
 const { runCommand } = require("./commands/run");
@@ -49,6 +50,13 @@ async function main() {
     console.log(`Command: ${command}`);
     console.log("");
     const code = await verifyRecipesCommand({ args, jsonOutput });
+    process.exit(code);
+  }
+
+  if (command === "verify-policy") {
+    console.log(`Command: ${command}`);
+    console.log("");
+    const code = await verifyPolicyCommand({ args, jsonOutput });
     process.exit(code);
   }
 

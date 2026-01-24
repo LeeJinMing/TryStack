@@ -26,6 +26,18 @@ cd cli
 node entry.js verify-recipes --json
 ```
 
+## Verified policy (for promotion / auto-merge)
+
+When promoting a recipe into the **verified** stream, it must satisfy the static **Verified Policy**.
+
+- Docs: `docs/policies/verified-policy.md`
+- Local check (static, no docker):
+
+```bash
+cd cli
+node entry.js verify-policy --mode verified
+```
+
 1) Open a Pull Request. CI will run checks automatically.
 
 ## Spec

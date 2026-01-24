@@ -1,0 +1,39 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: mattermost
+  repo: mattermost
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: mattermost
+    protocol: http
+    hostPort: 8065
+    containerPort: 8065
+
+ui:
+  url: "http://localhost:8065"
+  healthcheck:
+    method: GET
+    # Server readiness endpoint (returns 200 + {"status":"OK"} when ready)
+    path: /api/v4/system/ping
+    expectStatus: 200
+    match: '"status":"OK"'
+
+env:
+  required: []
+  optional:
+    - MM_SERVICESETTINGS_SITEURL
+
+notes:
+  setup: |
+    Open the UI and complete the first-time admin setup.
+  limitations: |
+    This recipe runs Mattermost Team Edition with a local Postgres database for evaluation.
+
