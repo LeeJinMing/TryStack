@@ -3,7 +3,86 @@ if (yearEl) {
   yearEl.textContent = String(new Date().getFullYear());
 }
 
-const NPX_PACKAGE = (typeof window !== "undefined" && window.TRYSTACK_NPX_PACKAGE) || "github:LeeJinMing/TryStack#v0.0.2";
+const DEFAULT_NPX_PACKAGE =
+  (typeof window !== "undefined" && window.TRYSTACK_NPX_PACKAGE) || "github:LeeJinMing/TryStack#v0.0.2";
+
+let currentNpxPackage = DEFAULT_NPX_PACKAGE;
+let currentReleaseTag = null; // e.g. "v0.0.2"
+
+function getNpxPackage() {
+  return currentNpxPackage || DEFAULT_NPX_PACKAGE;
+}
+
+function parseTagFromNpxPackage(pkg) {
+  const s = String(pkg || "");
+  const m = s.match(/#(v\d+\.\d+\.\d+(?:[-+][A-Za-z0-9.-]+)?)$/);
+  return m ? m[1] : null;
+}
+
+function setNpxPackage({ npxPackage, tag }) {
+  const pkg = String(npxPackage || "").trim();
+  if (!pkg) return;
+  currentNpxPackage = pkg;
+  currentReleaseTag = String(tag || "").trim() || parseTagFromNpxPackage(pkg);
+  updatePinnedUi();
+}
+
+function updatePinnedUi() {
+  const tag = currentReleaseTag || parseTagFromNpxPackage(getNpxPackage()) || "v0.0.2";
+  const releaseLink = document.getElementById("releaseLink");
+  const releaseTag = document.getElementById("releaseTag");
+  const pinnedTag = document.getElementById("pinnedTag");
+  const tryLocallyCmd = document.getElementById("tryLocallyCmd");
+  const protocolInstallInline = document.getElementById("protocolInstallInline");
+
+  if (releaseTag) releaseTag.textContent = tag;
+  if (pinnedTag) pinnedTag.textContent = tag;
+  if (releaseLink) releaseLink.setAttribute("href", `https://github.com/LeeJinMing/TryStack/releases/tag/${tag}`);
+
+  if (tryLocallyCmd) {
+    tryLocallyCmd.textContent = `npx --yes -p github:LeeJinMing/TryStack#${tag} trystack up louislam/uptime-kuma\ntrystack ps louislam/uptime-kuma`;
+  }
+  if (protocolInstallInline) {
+    protocolInstallInline.textContent = `npx --yes -p github:LeeJinMing/TryStack#${tag} trystack protocol install`;
+  }
+}
+
+function cacheGet(key) {
+  try {
+    const raw = window.sessionStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function cacheSet(key, value) {
+  try {
+    window.sessionStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // ignore
+  }
+}
+
+async function resolveLatestReleaseTag() {
+  const cacheKey = "trystack_latest_release_v1";
+  const cached = cacheGet(cacheKey);
+  const now = Date.now();
+  if (cached?.tag && typeof cached?.ts === "number" && now - cached.ts < 6 * 60 * 60 * 1000) {
+    return String(cached.tag);
+  }
+
+  try {
+    const data = await fetchJson("https://api.github.com/repos/LeeJinMing/TryStack/releases/latest");
+    const tag = String(data?.tag_name || "").trim();
+    if (!/^v\d+\.\d+\.\d+/.test(tag)) return null;
+    cacheSet(cacheKey, { tag, ts: now });
+    return tag;
+  } catch {
+    return null;
+  }
+}
 
 async function fetchJson(url) {
   const res = await fetch(url, { cache: "no-store" });
@@ -52,6 +131,91 @@ async function copyToClipboard(text) {
     window.prompt("Copy command:", text);
     return false;
   }
+}
+
+function isProbablyWindows() {
+  const ua = String(navigator.userAgent || "");
+  return ua.includes("Windows");
+}
+
+function openProtocolHelp({ uri }) {
+  const dlg = document.getElementById("protocolDialog");
+  const cmdEl = document.getElementById("protocolInstallCmd");
+  const uriEl = document.getElementById("protocolUri");
+  const copyBtn = document.getElementById("protocolCopyBtn");
+  if (!dlg || !cmdEl || !uriEl) return;
+
+  const installCmd = `npx --yes -p ${getNpxPackage()} trystack protocol install`;
+  cmdEl.textContent = installCmd;
+  uriEl.textContent = String(uri || "");
+
+  if (copyBtn) {
+    copyBtn.onclick = async () => {
+      await copyToClipboard(installCmd);
+    };
+  }
+
+  if (!isProbablyWindows()) {
+    cmdEl.textContent = `${installCmd}\n\n(note: protocol install is Windows-only)`;
+  }
+
+  if (typeof dlg.showModal === "function") dlg.showModal();
+}
+
+function tryOpenProtocol(uri) {
+  const target = String(uri || "").trim();
+  if (!target) return;
+
+  // Best-effort heuristic:
+  // If the app handler exists, browser typically triggers a native prompt / switches focus.
+  // If nothing happens, we show a help dialog after a short delay.
+  let didBlur = false;
+  const onBlur = () => {
+    didBlur = true;
+  };
+  window.addEventListener("blur", onBlur, { once: true });
+
+  try {
+    window.location.href = target;
+  } catch {
+    // ignore
+  }
+
+  setTimeout(() => {
+    try {
+      window.removeEventListener("blur", onBlur);
+    } catch {
+      // ignore
+    }
+    if (!didBlur && document.visibilityState === "visible") {
+      openProtocolHelp({ uri: target });
+    }
+  }, 1200);
+}
+
+function buildUpArgs(owner, repo, recipeId) {
+  const rid = String(recipeId || "default");
+  return rid === "default" ? `trystack up ${owner}/${repo}` : `trystack up ${owner}/${repo} --recipe ${rid}`;
+}
+
+function buildUpCommand(owner, repo, recipeId) {
+  return `npx --yes -p ${getNpxPackage()} ${buildUpArgs(owner, repo, recipeId)}`;
+}
+
+function buildScaffoldCommand(owner, repo) {
+  return `npx --yes -p ${getNpxPackage()} trystack scaffold ${owner}/${repo}`;
+}
+
+function buildMoreActions(children) {
+  const details = document.createElement("details");
+  details.className = "recipe-more";
+  const summary = document.createElement("summary");
+  summary.className = "btn";
+  summary.textContent = "More";
+  const panel = el("div", { class: "recipe-more-panel" }, children);
+  details.appendChild(summary);
+  details.appendChild(panel);
+  return details;
 }
 
 function downloadTextFile({ filename, content, mime = "text/plain;charset=utf-8" }) {
@@ -189,24 +353,13 @@ function renderRecipes(recipes, filterText) {
     const header = el("div", { class: "recipe-title", text: r.title });
     const meta = el("div", { class: "recipe-meta muted", text: `recipe: ${r.recipeId}` });
     const snippet = el("div", { class: "recipe-snippet", text: r.snippet || "" });
-    const cmd = el("code", { class: "recipe-cmd", text: r.command });
+    const command = buildUpCommand(r.owner, r.repo, r.recipeId);
+    const cmd = el("code", { class: "recipe-cmd", text: command });
 
     const copyBtn = el("button", { class: "btn primary", type: "button" }, []);
     copyBtn.textContent = "Copy command";
     copyBtn.addEventListener("click", async () => {
-      await copyToClipboard(r.command);
-    });
-
-    const dlBtn = el("button", { class: "btn", type: "button" }, []);
-    dlBtn.textContent = "Download script (.cmd/.ps1)";
-    dlBtn.addEventListener("click", () => {
-      downloadRunScripts({
-        owner: r.owner,
-        repo: r.repo,
-        recipeId: r.recipeId,
-        command: r.command,
-        prefix: "trystack-up",
-      });
+      await copyToClipboard(command);
     });
 
     const protoLink = el(
@@ -220,6 +373,10 @@ function renderRecipes(recipes, filterText) {
       [],
     );
     protoLink.textContent = "Open (1-click)";
+    protoLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      tryOpenProtocol(protoLink.getAttribute("href"));
+    });
 
     const doctorLink = el(
       "a",
@@ -232,6 +389,22 @@ function renderRecipes(recipes, filterText) {
       [],
     );
     doctorLink.textContent = "Doctor (1-click)";
+    doctorLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      tryOpenProtocol(doctorLink.getAttribute("href"));
+    });
+
+    const dlBtn = el("button", { class: "btn", type: "button" }, []);
+    dlBtn.textContent = "Download script (.cmd/.ps1)";
+    dlBtn.addEventListener("click", () => {
+      downloadRunScripts({
+        owner: r.owner,
+        repo: r.repo,
+        recipeId: r.recipeId,
+        command: command,
+        prefix: "trystack-up",
+      });
+    });
 
     const readmeBtn = el("button", { class: "btn", type: "button" }, []);
     readmeBtn.textContent = "View README";
@@ -246,7 +419,8 @@ function renderRecipes(recipes, filterText) {
     ghLink.textContent = "GitHub";
     if (!r.github) ghLink.setAttribute("aria-disabled", "true");
 
-    const actions = el("div", { class: "recipe-actions" }, [copyBtn, dlBtn, protoLink, doctorLink, readmeBtn, ghLink]);
+    const more = buildMoreActions([dlBtn, doctorLink, readmeBtn, ghLink]);
+    const actions = el("div", { class: "recipe-actions" }, [copyBtn, protoLink, more]);
 
     const card = el("div", { class: "recipe-card" }, [
       header,
@@ -273,6 +447,16 @@ async function initRecipes() {
   if (!search) return;
 
   try {
+    // Keep the UI stable but refresh to latest release tag (best-effort).
+    updatePinnedUi();
+    const latestTag = await resolveLatestReleaseTag();
+    if (latestTag) {
+      setNpxPackage({
+        npxPackage: `github:LeeJinMing/TryStack#${latestTag}`,
+        tag: latestTag,
+      });
+    }
+
     const data = await loadRecipes();
     const recipes = Array.isArray(data?.recipes) ? data.recipes : [];
     renderRecipes(recipes, "");
@@ -296,7 +480,7 @@ async function initRecipes() {
         const repo = parsed.repo;
         const hits = recipes.filter((r) => r.owner === owner && r.repo === repo);
         if (hits.length === 0) {
-          const scaffold = `npx --yes -p ${NPX_PACKAGE} trystack scaffold ${owner}/${repo}`;
+          const scaffold = buildScaffoldCommand(owner, repo);
           repoResult.innerHTML = `<div class="bad">No recipe found for <b>${owner}/${repo}</b> yet.</div>
             <div class="row muted">You (or the maintainer) can add one via a PR to this repo.</div>
             <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -339,9 +523,14 @@ async function initRecipes() {
           <div class="row">
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
               <button id="repoCopy" class="btn primary" type="button">Copy command</button>
-              <button id="repoDl" class="btn" type="button">Download script (.cmd/.ps1)</button>
               <a id="repoOpen" class="btn" href="#" style="text-decoration:none;">Open (1-click)</a>
-              <a id="repoDoctor" class="btn" href="#" style="text-decoration:none;">Doctor (1-click)</a>
+              <details class="recipe-more">
+                <summary class="btn">More</summary>
+                <div class="recipe-more-panel">
+                  <button id="repoDl" class="btn" type="button">Download script (.cmd/.ps1)</button>
+                  <a id="repoDoctor" class="btn" href="#" style="text-decoration:none;">Doctor (1-click)</a>
+                </div>
+              </details>
             </div>
           </div>
         `;
@@ -350,8 +539,7 @@ async function initRecipes() {
         const copy = document.getElementById("repoCopy");
         const buildCmd = () => {
           const rid = String(sel?.value || "default");
-          const args = rid === "default" ? `trystack up ${owner}/${repo}` : `trystack up ${owner}/${repo} --recipe ${rid}`;
-          return `npx --yes -p ${NPX_PACKAGE} ${args}`;
+          return buildUpCommand(owner, repo, rid);
         };
         if (copy) {
           copy.addEventListener("click", async () => {
@@ -380,6 +568,10 @@ async function initRecipes() {
           };
           open1.setAttribute("href", buildUri());
           if (sel) sel.addEventListener("change", () => open1.setAttribute("href", buildUri()));
+          open1.addEventListener("click", (e) => {
+            e.preventDefault();
+            tryOpenProtocol(open1.getAttribute("href"));
+          });
         }
 
         const doctor1 = document.getElementById("repoDoctor");
@@ -392,6 +584,10 @@ async function initRecipes() {
           };
           doctor1.setAttribute("href", buildUri());
           if (sel) sel.addEventListener("change", () => doctor1.setAttribute("href", buildUri()));
+          doctor1.addEventListener("click", (e) => {
+            e.preventDefault();
+            tryOpenProtocol(doctor1.getAttribute("href"));
+          });
         }
       };
 

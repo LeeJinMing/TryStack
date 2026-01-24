@@ -9,6 +9,20 @@ const recipesRoot = path.join(repoRoot, "recipes");
 const DEFAULT_NPX_PACKAGE = "github:LeeJinMing/TryStack#v0.0.2";
 const NPX_PACKAGE = process.env.TRYSTACK_NPX_PACKAGE || DEFAULT_NPX_PACKAGE;
 
+function buildId() {
+  const sha = String(process.env.GITHUB_SHA || "").trim();
+  if (sha) return sha.slice(0, 8);
+  // fallback for local builds
+  return String(Date.now());
+}
+
+function injectCacheBustingIntoIndexHtml(html, id) {
+  const v = encodeURIComponent(String(id || "").trim() || "dev");
+  return String(html || "")
+    .replace(/href="\.\/src\/style\.css(?:\?[^"]*)?"/g, `href="./src/style.css?v=${v}"`)
+    .replace(/src="\.\/src\/main\.js(?:\?[^"]*)?"/g, `src="./src/main.js?v=${v}"`);
+}
+
 function ensureDir(p) {
   fs.mkdirSync(p, { recursive: true });
 }
@@ -98,7 +112,14 @@ function buildRecipesIndex() {
 if (fs.existsSync(dist)) fs.rmSync(dist, { recursive: true, force: true });
 ensureDir(dist);
 
-copyFile(path.join(root, "index.html"), path.join(dist, "index.html"));
+{
+  const srcIndex = path.join(root, "index.html");
+  const dstIndex = path.join(dist, "index.html");
+  const html = fs.readFileSync(srcIndex, "utf8");
+  const patched = injectCacheBustingIntoIndexHtml(html, buildId());
+  ensureDir(path.dirname(dstIndex));
+  fs.writeFileSync(dstIndex, patched, "utf8");
+}
 copyDir(path.join(root, "src"), path.join(dist, "src"));
 
 // Generate static recipes index + README copies for pure static hosting.

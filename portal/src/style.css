@@ -48,7 +48,21 @@ pre {
 .recipes-tools {
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
   gap: 12px;
+}
+
+.recipes-tools .input {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 220px;
+}
+
+#recipeCount {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  min-width: 92px; /* room for "9999 / 9999" */
+  text-align: right;
 }
 
 .try-row {
@@ -195,6 +209,25 @@ ul {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 12px;
+}
+
+.recipe-more {
+  display: block;
+}
+
+.recipe-more > summary {
+  list-style: none;
+}
+
+.recipe-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.recipe-more-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
 }
 
 .dialog {
