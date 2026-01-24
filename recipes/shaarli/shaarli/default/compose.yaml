@@ -1,6 +1,9 @@
 services:
   shaarli:
-    image: ghcr.io/shaarli/shaarli:latest
+    # NOTE:
+    # Newer images built around 2026-01 may be broken (missing /bin/s6-svscan).
+    # Pin to a known-good release for CI stability.
+    image: ghcr.io/shaarli/shaarli:v0.14.0
     restart: unless-stopped
     ports:
       - "8104:80"

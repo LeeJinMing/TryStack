@@ -139,11 +139,14 @@ jobs:
             # - Prefer IPv4 for localhost (some runners resolve localhost to ::1 first)
             echo "Waiting for UI: ${ui_url}${hc_path}"
             ok=0
+            cookie_jar="/tmp/cookies_${proj}.txt"
+            rm -f "$cookie_jar" || true
             for i in {1..60}; do
               # NOTE:
               # curl may exit non-zero (e.g. connection reset) while the service is starting.
               # Convert errors into an HTTP code "000" and keep retrying instead of aborting early.
-              status="$(curl -sS -L -4 -o /tmp/body.txt -w "%{http_code}" "${ui_url}${hc_path}" 2>/dev/null || echo 000)"
+              # Keep cookies across redirects (some installers rely on a session cookie).
+              status="$(curl -sS -L -4 -c "$cookie_jar" -b "$cookie_jar" -o /tmp/body.txt -w "%{http_code}" "${ui_url}${hc_path}" 2>/dev/null || echo 000)"
               if [[ "$status" == "$expect_status" ]]; then
                 if [[ -n "$match" ]]; then
                   if grep -qi --fixed-strings "$match" /tmp/body.txt; then

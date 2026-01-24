@@ -2,6 +2,13 @@ services:
   stirling-pdf:
     image: stirlingtools/stirling-pdf:latest
     restart: unless-stopped
+    environment:
+      # Disable login for local evaluation / CI "UI is reachable" check.
+      # Docs: https://docs.stirlingpdf.com/Configuration#authentication
+      SECURITY_ENABLELOGIN: "false"
+      # Ensure the web server is reachable through Docker port mapping.
+      # Some images may default to binding on 127.0.0.1 inside the container.
+      SERVER_ADDRESS: "0.0.0.0"
     ports:
       - "8109:8080"
 
