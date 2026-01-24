@@ -261,12 +261,28 @@ function buildCmdScript(command) {
     "  exit /b 127",
     ")",
     "echo.",
-    cmd,
+    // NOTE: on Windows, `npx` is typically `npx.cmd` (a batch file).
+    // Calling another batch file requires `call`, otherwise control doesn't return
+    // and this script ends before reaching the final pause.
+    `call ${cmd}`,
     "echo.",
     "echo Done. Press any key to close.",
     "pause >nul",
     "",
   ].join("\r\n");
+}
+
+function parseSemverTag(tag) {
+  const m = String(tag || "").trim().match(/^v(\d+)\.(\d+)\.(\d+)/);
+  if (!m) return null;
+  return { major: Number(m[1]), minor: Number(m[2]), patch: Number(m[3]) };
+}
+
+function compareSemver(a, b) {
+  if (!a || !b) return 0;
+  if (a.major !== b.major) return a.major - b.major;
+  if (a.minor !== b.minor) return a.minor - b.minor;
+  return a.patch - b.patch;
 }
 
 function buildPs1Script(command) {
@@ -469,10 +485,16 @@ async function initRecipes() {
     updatePinnedUi();
     const latestTag = await resolveLatestReleaseTag();
     if (latestTag) {
-      setNpxPackage({
-        npxPackage: `github:LeeJinMing/TryStack#${latestTag}`,
-        tag: latestTag,
-      });
+      const pinnedTag = currentReleaseTag || parseTagFromNpxPackage(getNpxPackage());
+      const latestVer = parseSemverTag(latestTag);
+      const pinnedVer = parseSemverTag(pinnedTag);
+      const shouldUseLatest = !pinnedVer || (latestVer && compareSemver(latestVer, pinnedVer) >= 0);
+      if (shouldUseLatest) {
+        setNpxPackage({
+          npxPackage: `github:LeeJinMing/TryStack#${latestTag}`,
+          tag: latestTag,
+        });
+      }
     }
 
     const data = await loadRecipes();
