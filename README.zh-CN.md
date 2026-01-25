@@ -15,6 +15,10 @@ npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack up louislam/uptime-kuma
 npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack ps louislam/uptime-kuma
 ```
 
+## 宣传视频
+
+观看：`https://github.com/LeeJinMing/TryStack/releases/download/v0.0.2/TryStack__Run_Apps_in_Minutes.mp4`
+
 ## Portal（在线入口）
 
 在 GitHub Pages 开启后（Settings → Pages → Source: GitHub Actions），Portal 地址为：

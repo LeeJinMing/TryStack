@@ -29,12 +29,7 @@ cli/index.js
 Thumbs.db
 Desktop.ini
 
-# Media files (videos and extracted frames)
-*.mp4
-*.avi
-*.mov
-*.mkv
-*.webm
+# Media files (extracted frames)
 *frames*/
 *frame_*.jpg
 *frame_*.png

@@ -1,6 +1,6 @@
 {
   "name": "trystack-cli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "TryStack CLI: resolve repo -> recipe -> docker compose up",
   "license": "MIT",

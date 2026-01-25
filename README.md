@@ -15,6 +15,10 @@ npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack up louislam/uptime-kuma
 npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack ps louislam/uptime-kuma
 ```
 
+## Demo video
+
+Watch: `https://github.com/LeeJinMing/TryStack/releases/download/v0.0.2/TryStack__Run_Apps_in_Minutes.mp4`
+
 ## Portal (online)
 
 After you enable GitHub Pages (Settings → Pages → Source: GitHub Actions), the Portal is available at:

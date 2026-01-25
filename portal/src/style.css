@@ -130,6 +130,21 @@ pre {
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 }
 
+.video-wrap {
+  margin-top: 12px;
+  background: #0f172a;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #0b1222;
+}
+
+.promo-video {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
 pre {
   background: #0f172a;
   color: #f8fafc;
