@@ -57,7 +57,7 @@ function updatePinnedUi() {
   const promoSource = document.getElementById("promoVideoSource");
   const promoLink = document.getElementById("promoVideoLink");
   const promoHint = document.getElementById("promoVideoHint");
-  const url = "./TryStack__Run_Apps_in_Minutes.mp4";
+  const url = "./AI%20captions%20-%20TryStack__Run_Apps_in_Minutes.mp4.mp4";
 
   if (promoLink) {
     promoLink.setAttribute(
