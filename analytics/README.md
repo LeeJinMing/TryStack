@@ -13,11 +13,13 @@
 3. 设置环境变量（可选，但建议）：
    - `ALLOWED_ORIGINS`: `https://leejinming.github.io,http://localhost:4173`
    - `RATE_LIMIT_PER_MIN`: `120`
+   - `ADMIN_TOKEN`: 访问 `/api/stats` 与 `/admin` 的口令（强烈建议设置，避免数据裸奔）
 
 部署后：
 
 - 管理页：`https://<your-app>.vercel.app/admin`
 - 埋点入口：`https://<your-app>.vercel.app/api/track`
+  - 统计接口：`https://<your-app>.vercel.app/api/stats?days=7&token=...`
 
 ## Portal 侧如何启用
 

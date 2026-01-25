@@ -35,6 +35,25 @@ function isAllowedOrigin(origin, allowlist) {
   return allowlist.includes(origin);
 }
 
+function getAdminToken() {
+  return String(process.env.ADMIN_TOKEN || "").trim();
+}
+
+function getProvidedToken(req, url) {
+  const q = String(url.searchParams.get("token") || "").trim();
+  if (q) return q;
+  const h = req.headers["x-admin-token"];
+  return Array.isArray(h) ? String(h[0] || "").trim() : String(h || "").trim();
+}
+
+function isAuthorized(req, url) {
+  const token = getAdminToken();
+  // If token is set, require it. If not set, leave stats open (not recommended for production).
+  if (!token) return true;
+  const provided = getProvidedToken(req, url);
+  return Boolean(provided) && provided === token;
+}
+
 function clampDays(raw) {
   const n = Number(raw);
   if (!Number.isFinite(n)) return 7;
@@ -92,6 +111,11 @@ export default async function handler(req, res) {
   }
 
   const url = new URL(req.url, "http://localhost");
+  if (!isAuthorized(req, url)) {
+    res.statusCode = 401;
+    res.end("Unauthorized");
+    return;
+  }
   const days = clampDays(url.searchParams.get("days") || "7");
 
   const daysList = [];

@@ -31,6 +31,8 @@
       <div class="muted">中文简表。数据来自 <code>/api/stats</code>（Vercel + KV）。</div>
 
       <div class="row">
+        <label class="muted">Admin Token</label>
+        <input id="token" type="password" placeholder="ADMIN_TOKEN" style="padding:8px 12px;border-radius:10px;border:1px solid #e5e7eb;min-width:220px;" />
         <label class="muted">时间范围</label>
         <select id="days">
           <option value="1">今天（1 天）</option>
@@ -89,9 +91,11 @@
 
       async function load() {
         const days = Number($("days").value || 7);
+        const token = String($("token").value || "").trim();
         $("status").textContent = "加载中…";
         try {
-          const res = await fetch(`/api/stats?days=${days}`, { cache: "no-store" });
+          const url = token ? `/api/stats?days=${days}&token=${encodeURIComponent(token)}` : `/api/stats?days=${days}`;
+          const res = await fetch(url, { cache: "no-store" });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const data = await res.json();
           const totals = data.totals || {};
@@ -109,6 +113,9 @@
 
       $("refresh").addEventListener("click", load);
       $("days").addEventListener("change", load);
+      $("token").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") load();
+      });
       load();
     </script>
   </body>
