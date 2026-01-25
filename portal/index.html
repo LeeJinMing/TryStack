@@ -161,6 +161,8 @@ trystack ps louislam/uptime-kuma</code></pre>
       // Optional analytics (default: disabled).
       // Inject during build (GitHub Pages workflow) via:
       // - TRYSTACK_ANALYTICS_ENDPOINT (e.g. https://your-app.vercel.app/api/track)
+      // NOTE: This value is injected at build time; changing GitHub secrets alone won't update the live site
+      // unless a Pages build is triggered (push under portal/** or manually dispatch if enabled).
       window.TRYSTACK_ANALYTICS = {
         endpoint: "__TRYSTACK_ANALYTICS_ENDPOINT__",
       };
