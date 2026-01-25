@@ -1,0 +1,12 @@
+{
+  "name": "trystack-analytics",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Minimal analytics backend for TryStack Portal (Vercel + KV).",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/kv": "^2.0.0"
+  }
+}
+

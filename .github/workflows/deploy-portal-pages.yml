@@ -30,6 +30,9 @@ jobs:
         run: |
           set -euo pipefail
           node portal/build.js
+        env:
+          # Optional analytics (Vercel backend). If not set, analytics is disabled.
+          TRYSTACK_ANALYTICS_ENDPOINT: ${{ secrets.TRYSTACK_ANALYTICS_ENDPOINT }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

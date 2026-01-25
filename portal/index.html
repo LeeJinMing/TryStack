@@ -157,6 +157,14 @@ trystack ps louislam/uptime-kuma</code></pre>
       // Used by Portal UI when generating commands (e.g. scaffold suggestions).
       window.TRYSTACK_NPX_PACKAGE = "github:LeeJinMing/TryStack#v0.0.2";
     </script>
+    <script>
+      // Optional analytics (default: disabled).
+      // Inject during build (GitHub Pages workflow) via:
+      // - TRYSTACK_ANALYTICS_ENDPOINT (e.g. https://your-app.vercel.app/api/track)
+      window.TRYSTACK_ANALYTICS = {
+        endpoint: "__TRYSTACK_ANALYTICS_ENDPOINT__",
+      };
+    </script>
     <script type="module" src="./src/main.js"></script>
   </body>
 </html>

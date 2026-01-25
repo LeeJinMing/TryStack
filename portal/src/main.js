@@ -3,6 +3,53 @@ if (yearEl) {
   yearEl.textContent = String(new Date().getFullYear());
 }
 
+function getAnalyticsEndpoint() {
+  try {
+    const cfg = (typeof window !== "undefined" && window.TRYSTACK_ANALYTICS) || null;
+    const endpoint = cfg && typeof cfg === "object" ? String(cfg.endpoint || "").trim() : "";
+    if (!endpoint || endpoint.startsWith("__TRYSTACK_")) return "";
+    return endpoint;
+  } catch {
+    return "";
+  }
+}
+
+let analyticsEndpoint = "";
+
+function initAnalytics() {
+  analyticsEndpoint = getAnalyticsEndpoint();
+}
+
+function track(name, props = {}) {
+  try {
+    if (!analyticsEndpoint) return;
+    const n = String(name || "").trim();
+    if (!n) return;
+
+    const payload = {
+      name: n,
+      ts: Date.now(),
+      props: typeof props === "object" && props ? props : {},
+    };
+
+    // Prefer sendBeacon (non-blocking); fall back to fetch.
+    const body = JSON.stringify(payload);
+    if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+      const blob = new Blob([body], { type: "application/json" });
+      navigator.sendBeacon(analyticsEndpoint, blob);
+      return;
+    }
+    fetch(analyticsEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      keepalive: true,
+    }).catch(() => {});
+  } catch {
+    // ignore
+  }
+}
+
 const DEFAULT_NPX_PACKAGE =
   (typeof window !== "undefined" && window.TRYSTACK_NPX_PACKAGE) || "github:LeeJinMing/TryStack#main";
 
@@ -427,11 +474,13 @@ function renderRecipes(recipes, filterText) {
     const snippet = el("div", { class: "recipe-snippet", text: r.snippet || "" });
     const command = buildUpCommand(r.owner, r.repo, r.recipeId);
     const cmd = el("code", { class: "recipe-cmd", text: command });
+    const repoId = `${r.owner}/${r.repo}`;
 
     const copyBtn = el("button", { class: "btn primary", type: "button" }, []);
     copyBtn.textContent = "Copy command";
     copyBtn.addEventListener("click", async () => {
       await copyToClipboard(command);
+      track("copy_command", { source: "recipe_card", repo: repoId, recipeId: r.recipeId || "default" });
     });
 
     const protoLink = el(
@@ -448,6 +497,7 @@ function renderRecipes(recipes, filterText) {
     protoLink.addEventListener("click", (e) => {
       e.preventDefault();
       tryOpenProtocol(protoLink.getAttribute("href"));
+      track("open_one_click", { action: "up", source: "recipe_card", repo: repoId, recipeId: r.recipeId || "default" });
     });
 
     const doctorLink = el(
@@ -464,6 +514,12 @@ function renderRecipes(recipes, filterText) {
     doctorLink.addEventListener("click", (e) => {
       e.preventDefault();
       tryOpenProtocol(doctorLink.getAttribute("href"));
+      track("open_one_click", {
+        action: "doctor",
+        source: "recipe_card",
+        repo: repoId,
+        recipeId: r.recipeId || "default",
+      });
     });
 
     const dlBtn = el("button", { class: "btn", type: "button" }, []);
@@ -476,6 +532,7 @@ function renderRecipes(recipes, filterText) {
         command: command,
         prefix: "trystack-up",
       });
+      track("download_script", { source: "recipe_card", repo: repoId, recipeId: r.recipeId || "default" });
     });
 
     const readmeBtn = el("button", { class: "btn", type: "button" }, []);
@@ -485,6 +542,7 @@ function renderRecipes(recipes, filterText) {
       if (!r.readme) return;
       const md = await fetchText(r.readme);
       openReadme(`${r.title} (${r.recipeId})`, md);
+      track("view_readme", { source: "recipe_card", repo: repoId, recipeId: r.recipeId || "default" });
     });
 
     const ghLink = el("a", { class: "btn", href: r.github || "#", target: "_blank", rel: "noreferrer" }, []);
@@ -519,6 +577,9 @@ async function initRecipes() {
   if (!search) return;
 
   try {
+    initAnalytics();
+    track("page_view", {});
+
     // Keep the UI stable but refresh to latest release tag (best-effort).
     updatePinnedUi();
     const latestTag = await resolveLatestReleaseTag();
@@ -552,6 +613,7 @@ async function initRecipes() {
         const parsed = parseRepoInput(raw);
         if (!parsed) {
           repoResult.innerHTML = `<div class="bad">Please enter owner/repo or a GitHub URL</div>`;
+          track("repo_lookup", { result: "invalid_input" });
           return;
         }
         const owner = parsed.owner;
@@ -559,6 +621,7 @@ async function initRecipes() {
         const hits = recipes.filter((r) => r.owner === owner && r.repo === repo);
         if (hits.length === 0) {
           const scaffold = buildScaffoldCommand(owner, repo);
+          track("repo_lookup", { result: "not_found", repo: `${owner}/${repo}` });
           repoResult.innerHTML = `<div class="bad">No recipe found for <b>${owner}/${repo}</b> yet.</div>
             <div class="row muted">You (or the maintainer) can add one via a PR to this repo.</div>
             <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;">
@@ -570,6 +633,7 @@ async function initRecipes() {
           if (scaffoldBtn) {
             scaffoldBtn.addEventListener("click", async () => {
               await copyToClipboard(scaffold);
+              track("copy_command", { source: "repo_lookup_scaffold", repo: `${owner}/${repo}` });
             });
           }
           const scaffoldDl = document.getElementById("repoScaffoldDl");
@@ -582,10 +646,13 @@ async function initRecipes() {
                 command: scaffold,
                 prefix: "trystack-scaffold",
               });
+              track("download_script", { source: "repo_lookup_scaffold", repo: `${owner}/${repo}` });
             });
           }
           return;
         }
+
+        track("repo_lookup", { result: "found", repo: `${owner}/${repo}`, recipes: hits.length });
 
         const options = hits
           .map((h) => `<option value="${h.recipeId}">${h.recipeId}</option>`)
@@ -622,6 +689,7 @@ async function initRecipes() {
         if (copy) {
           copy.addEventListener("click", async () => {
             await copyToClipboard(buildCmd());
+            track("copy_command", { source: "repo_lookup", repo: `${owner}/${repo}`, recipeId: String(sel?.value || "default") });
           });
         }
         const dl = document.getElementById("repoDl");
@@ -634,6 +702,7 @@ async function initRecipes() {
               command: buildCmd(),
               prefix: "trystack-up",
             });
+            track("download_script", { source: "repo_lookup", repo: `${owner}/${repo}`, recipeId: String(sel?.value || "default") });
           });
         }
         const open1 = document.getElementById("repoOpen");
@@ -649,6 +718,7 @@ async function initRecipes() {
           open1.addEventListener("click", (e) => {
             e.preventDefault();
             tryOpenProtocol(open1.getAttribute("href"));
+            track("open_one_click", { action: "up", source: "repo_lookup", repo: `${owner}/${repo}`, recipeId: String(sel?.value || "default") });
           });
         }
 
@@ -665,6 +735,7 @@ async function initRecipes() {
           doctor1.addEventListener("click", (e) => {
             e.preventDefault();
             tryOpenProtocol(doctor1.getAttribute("href"));
+            track("open_one_click", { action: "doctor", source: "repo_lookup", repo: `${owner}/${repo}`, recipeId: String(sel?.value || "default") });
           });
         }
       };

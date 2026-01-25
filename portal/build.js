@@ -23,6 +23,13 @@ function injectCacheBustingIntoIndexHtml(html, id) {
     .replace(/src="\.\/src\/main\.js(?:\?[^"]*)?"/g, `src="./src/main.js?v=${v}"`);
 }
 
+function injectAnalyticsIntoIndexHtml(html) {
+  const endpoint = String(process.env.TRYSTACK_ANALYTICS_ENDPOINT || "").trim();
+  // Keep analytics disabled if not provided (or left as placeholder).
+  const safeEndpoint = endpoint || "";
+  return String(html || "").replace(/__TRYSTACK_ANALYTICS_ENDPOINT__/g, safeEndpoint);
+}
+
 function ensureDir(p) {
   fs.mkdirSync(p, { recursive: true });
 }
@@ -116,7 +123,7 @@ ensureDir(dist);
   const srcIndex = path.join(root, "index.html");
   const dstIndex = path.join(dist, "index.html");
   const html = fs.readFileSync(srcIndex, "utf8");
-  const patched = injectCacheBustingIntoIndexHtml(html, buildId());
+  const patched = injectAnalyticsIntoIndexHtml(injectCacheBustingIntoIndexHtml(html, buildId()));
   ensureDir(path.dirname(dstIndex));
   fs.writeFileSync(dstIndex, patched, "utf8");
 }
