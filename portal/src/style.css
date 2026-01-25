@@ -164,6 +164,18 @@ ul {
   margin-top: 14px;
 }
 
+.recipes-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.recipes-footer .muted {
+  white-space: nowrap;
+}
+
 @media (max-width: 860px) {
   .section-head {
     flex-direction: column;

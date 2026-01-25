@@ -20,6 +20,9 @@ function initAnalytics() {
   analyticsEndpoint = getAnalyticsEndpoint();
 }
 
+const RECIPES_PAGE_SIZE = 24;
+let recipesVisibleCount = RECIPES_PAGE_SIZE;
+
 function track(name, props = {}) {
   try {
     if (!analyticsEndpoint) return;
@@ -454,6 +457,8 @@ function getRepoFromQuery() {
 
 function renderRecipes(recipes, filterText) {
   const list = document.getElementById("recipesList");
+  const loadMoreBtn = document.getElementById("recipesLoadMore");
+  const shownEl = document.getElementById("recipesShown");
   if (!list) return;
   list.innerHTML = "";
 
@@ -469,10 +474,22 @@ function renderRecipes(recipes, filterText) {
 
   if (filtered.length === 0) {
     list.appendChild(el("div", { class: "muted", text: "No matches." }));
+    if (loadMoreBtn) loadMoreBtn.style.display = "none";
+    if (shownEl) shownEl.textContent = "";
     return;
   }
 
-  for (const r of filtered) {
+  const visible = q ? filtered.length : Math.max(1, recipesVisibleCount);
+  const slice = filtered.slice(0, visible);
+
+  if (shownEl) {
+    shownEl.textContent = !q && slice.length < filtered.length ? `Showing ${slice.length} of ${filtered.length}` : "";
+  }
+  if (loadMoreBtn) {
+    loadMoreBtn.style.display = !q && slice.length < filtered.length ? "" : "none";
+  }
+
+  for (const r of slice) {
     const header = el("div", { class: "recipe-title", text: r.title });
     const meta = el("div", { class: "recipe-meta muted", text: `recipe: ${r.recipeId}` });
     const snippet = el("div", { class: "recipe-snippet", text: r.snippet || "" });
@@ -602,8 +619,20 @@ async function initRecipes() {
 
     const data = await loadRecipes();
     const recipes = Array.isArray(data?.recipes) ? data.recipes : [];
+    recipesVisibleCount = RECIPES_PAGE_SIZE;
     renderRecipes(recipes, "");
-    search.addEventListener("input", () => renderRecipes(recipes, search.value));
+    search.addEventListener("input", () => {
+      recipesVisibleCount = RECIPES_PAGE_SIZE;
+      renderRecipes(recipes, search.value);
+    });
+
+    const loadMoreBtn = document.getElementById("recipesLoadMore");
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener("click", () => {
+        recipesVisibleCount += RECIPES_PAGE_SIZE;
+        renderRecipes(recipes, search.value);
+      });
+    }
 
     const CONTRIBUTING_URL = "https://github.com/LeeJinMing/TryStack/blob/main/CONTRIBUTING.md";
 
