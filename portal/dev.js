@@ -87,6 +87,7 @@ function contentType(p) {
   if (p.endsWith(".js")) return "text/javascript; charset=utf-8";
   if (p.endsWith(".svg")) return "image/svg+xml";
   if (p.endsWith(".png")) return "image/png";
+  if (p.endsWith(".mp4")) return "video/mp4";
   return "application/octet-stream";
 }
 

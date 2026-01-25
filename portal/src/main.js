@@ -52,24 +52,21 @@ function updatePinnedUi() {
     protocolInstallInline.textContent = `npx --yes -p github:LeeJinMing/TryStack#${tag} trystack protocol install --package github:LeeJinMing/TryStack#${tag}`;
   }
 
-  // Promo video: prefer the current release tag (if it's a real release).
+  // Promo video: prefer same-origin asset shipped with Pages.
   const promoVideo = document.getElementById("promoVideo");
   const promoSource = document.getElementById("promoVideoSource");
   const promoLink = document.getElementById("promoVideoLink");
   const promoHint = document.getElementById("promoVideoHint");
-  const isSemver = /^v\d+\.\d+\.\d+/.test(tag);
-  const url = isSemver
-    ? `https://github.com/LeeJinMing/TryStack/releases/download/${tag}/TryStack__Run_Apps_in_Minutes.mp4`
-    : null;
+  const url = "./TryStack__Run_Apps_in_Minutes.mp4";
 
   if (promoLink) {
     promoLink.setAttribute(
       "href",
-      url || "https://github.com/LeeJinMing/TryStack/releases/latest",
+      url,
     );
   }
 
-  if (promoSource && url) {
+  if (promoSource) {
     const cur = String(promoSource.getAttribute("src") || "");
     if (cur !== url) {
       promoSource.setAttribute("src", url);
@@ -82,7 +79,7 @@ function updatePinnedUi() {
     promoVideo.addEventListener("error", () => {
       if (promoHint) {
         promoHint.textContent =
-          "Video failed to load. If you haven't uploaded the release asset yet, open the latest release and upload the mp4 as an asset.";
+          "Video failed to load. Ensure the promo mp4 exists in the GitHub Pages build artifact (portal/dist).";
       }
     });
   }

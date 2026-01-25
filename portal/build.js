@@ -122,6 +122,17 @@ ensureDir(dist);
 }
 copyDir(path.join(root, "src"), path.join(dist, "src"));
 
+// Optional: ship promo video with Pages artifact (kept at repo root).
+// This keeps the Portal demo playable without relying on Release assets.
+{
+  const videoName = "TryStack__Run_Apps_in_Minutes.mp4";
+  const srcVideo = path.join(repoRoot, videoName);
+  const dstVideo = path.join(dist, videoName);
+  if (fs.existsSync(srcVideo)) {
+    copyFile(srcVideo, dstVideo);
+  }
+}
+
 // Generate static recipes index + README copies for pure static hosting.
 const index = buildRecipesIndex();
 ensureDir(path.join(dist, "data"));
