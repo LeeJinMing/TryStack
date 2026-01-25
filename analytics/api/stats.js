@@ -104,16 +104,20 @@ export default async function handler(req, res) {
     return;
   }
 
-  if (!isAllowedOrigin(origin, allowlist)) {
-    res.statusCode = 403;
-    res.end("Forbidden");
-    return;
-  }
-
   const url = new URL(req.url, "http://localhost");
   if (!isAuthorized(req, url)) {
     res.statusCode = 401;
     res.end("Unauthorized");
+    return;
+  }
+
+  // NOTE:
+  // Some browsers may omit the Origin header for same-origin GET requests (e.g. calling /api/stats from /admin
+  // on the same domain). In that case, token auth is the primary protection.
+  // If Origin is present, still enforce allowlist to prevent cross-site reads.
+  if (origin && !isAllowedOrigin(origin, allowlist)) {
+    res.statusCode = 403;
+    res.end("Forbidden");
     return;
   }
   const days = clampDays(url.searchParams.get("days") || "7");
