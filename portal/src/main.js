@@ -32,19 +32,23 @@ function track(name, props = {}) {
       props: typeof props === "object" && props ? props : {},
     };
 
-    // Prefer sendBeacon (non-blocking); fall back to fetch.
+    // Prefer fetch (observable/reliable); fall back to sendBeacon.
     const body = JSON.stringify(payload);
-    if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
-      const blob = new Blob([body], { type: "application/json" });
-      navigator.sendBeacon(analyticsEndpoint, blob);
-      return;
-    }
     fetch(analyticsEndpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body,
       keepalive: true,
-    }).catch(() => {});
+    }).catch(() => {
+      try {
+        if (typeof navigator !== "undefined" && typeof navigator.sendBeacon === "function") {
+          const blob = new Blob([body], { type: "application/json" });
+          navigator.sendBeacon(analyticsEndpoint, blob);
+        }
+      } catch {
+        // ignore
+      }
+    });
   } catch {
     // ignore
   }
