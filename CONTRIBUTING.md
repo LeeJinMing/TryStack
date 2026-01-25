@@ -51,3 +51,10 @@ If your change impacts spec/CLI/security boundaries, please open an issue first:
 - Title: `Proposal: <short title>`
 - Include: problem, proposal, trade-offs, compatibility, verification plan
 - If it meets ADR criteria, add an ADR under `docs/decisions/`
+
+## Issues & labels
+
+- **Recipe request**: use the "Recipe request" issue template (label: `recipe-request`).
+- **Run failed / bug**: use the "Bug: run failed" issue template (labels: `bug`, `triage`).
+- We keep a small label set to make it easy for contributors to find tasks:
+  - `good first issue`, `help wanted`, `recipe`, `portal`, `cli`, `analytics`

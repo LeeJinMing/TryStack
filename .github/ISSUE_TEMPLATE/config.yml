@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussions (Q&A / Ideas)
+    url: https://github.com/LeeJinMing/TryStack/discussions
+    about: Ask questions, share ideas, or propose changes that need discussion.
+  - name: Recipe spec
+    url: https://github.com/LeeJinMing/TryStack/blob/main/spec/recipe-spec.md
+    about: Recipe format, required fields, and examples.
+  - name: Contributing guide
+    url: https://github.com/LeeJinMing/TryStack/blob/main/CONTRIBUTING.md
+    about: How to add or update a recipe.

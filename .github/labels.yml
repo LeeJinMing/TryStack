@@ -1,0 +1,36 @@
+- name: bug
+  color: d73a4a
+  description: Something isn't working
+- name: enhancement
+  color: a2eeef
+  description: Improvement / feature
+- name: documentation
+  color: 0075ca
+  description: Docs changes
+- name: question
+  color: d876e3
+  description: Need clarification / Q&A
+- name: triage
+  color: fbca04
+  description: Needs triage
+- name: help wanted
+  color: 008672
+  description: Help wanted from community
+- name: good first issue
+  color: 7057ff
+  description: Good for newcomers
+- name: recipe
+  color: 0e8a16
+  description: Recipe related
+- name: recipe-request
+  color: 1d76db
+  description: Request a new recipe
+- name: portal
+  color: 5319e7
+  description: Portal UI (GitHub Pages)
+- name: cli
+  color: c2e0c6
+  description: CLI (npx trystack)
+- name: analytics
+  color: b60205
+  description: Analytics backend/admin

@@ -298,6 +298,45 @@ function buildScaffoldCommand(owner, repo) {
   return `npx --yes -p ${getNpxPackage()} trystack scaffold ${owner}/${repo}`;
 }
 
+function buildRecipeRequestIssueUrl(owner, repo) {
+  const base = "https://github.com/LeeJinMing/TryStack/issues/new";
+  const template = "recipe-request.md";
+  const repoId = `${owner}/${repo}`;
+  const title = `recipe-request: ${repoId}`;
+  const body = [
+    "## Target repo",
+    "",
+    `- GitHub repo: **${repoId}**`,
+    `- Link: https://github.com/${repoId}`,
+    "",
+    "## Category (choose one)",
+    "",
+    "- Monitoring / Status",
+    "- Notes / Knowledge base",
+    "- Files / Storage",
+    "- Passwords / Auth",
+    "- Download / Automation",
+    "- RSS / Read later",
+    "- Photos / Media",
+    "- Dashboard / Tools",
+    "- Other:",
+    "",
+    "## Expected level (A0/A1/A2/A3)",
+    "",
+    "- A0 / A1 / A2 / A3",
+    "",
+    "## Notes",
+    "",
+    "- (ports, volumes, default creds, etc.)",
+  ].join("\n");
+
+  const u = new URL(base);
+  u.searchParams.set("template", template);
+  u.searchParams.set("title", title);
+  u.searchParams.set("body", body);
+  return u.toString();
+}
+
 function buildMoreActions(children) {
   const details = document.createElement("details");
   details.className = "recipe-more";
@@ -654,12 +693,14 @@ async function initRecipes() {
         const hits = recipes.filter((r) => r.owner === owner && r.repo === repo);
         if (hits.length === 0) {
           const scaffold = buildScaffoldCommand(owner, repo);
+          const issueUrl = buildRecipeRequestIssueUrl(owner, repo);
           track("repo_lookup", { result: "not_found", repo: `${owner}/${repo}` });
           repoResult.innerHTML = `<div class="bad">No recipe found for <b>${owner}/${repo}</b> yet.</div>
             <div class="row muted">You (or the maintainer) can add one via a PR to this repo.</div>
             <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;">
               <button id="repoScaffoldCopy" class="btn primary" type="button">Copy scaffold command</button>
               <button id="repoScaffoldDl" class="btn" type="button">Download scaffold script (.cmd/.ps1)</button>
+              <a class="btn" href="${issueUrl}" target="_blank" rel="noreferrer">Create recipe request issue</a>
             </div>
             <div class="row"><a class="btn" href="${CONTRIBUTING_URL}" target="_blank" rel="noreferrer">How to add a recipe</a></div>`;
           const scaffoldBtn = document.getElementById("repoScaffoldCopy");
