@@ -15,6 +15,13 @@ npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack up louislam/uptime-kuma
 npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack ps louislam/uptime-kuma
 ```
 
+## 前置条件
+
+- 如果要把应用**真正跑起来并打开 UI**，需要 **Docker + Docker Compose**。
+  - Windows/macOS：通常安装 **Docker Desktop**
+  - Linux：通常安装 Docker Engine（含 docker/compose）
+- 如果你只是浏览 recipes，或做静态检查（如 `trystack verify-policy`、`trystack verify-recipes`），不需要 Docker。
+
 ## 宣传视频
 
 观看：`https://github.com/LeeJinMing/TryStack/releases/download/v0.0.2/TryStack__Run_Apps_in_Minutes.mp4`

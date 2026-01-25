@@ -15,6 +15,13 @@ npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack up louislam/uptime-kuma
 npx --yes -p github:LeeJinMing/TryStack#v0.0.2 trystack ps louislam/uptime-kuma
 ```
 
+## Prerequisites
+
+- To actually start apps, you need **Docker + Docker Compose**.
+  - Windows/macOS: install **Docker Desktop**
+  - Linux: install Docker Engine (Docker CLI + Compose)
+- If you only want to browse recipes or run static checks (e.g. `trystack verify-policy`, `trystack verify-recipes`), Docker is not required.
+
 ## Demo video
 
 Watch: `https://github.com/LeeJinMing/TryStack/releases/download/v0.0.2/TryStack__Run_Apps_in_Minutes.mp4`
