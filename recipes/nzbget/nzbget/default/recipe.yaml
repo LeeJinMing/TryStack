@@ -1,0 +1,40 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: nzbget
+  repo: nzbget
+  ref: ">=21.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: nzbget
+    protocol: http
+    hostPort: 6789
+    containerPort: 6789
+
+ui:
+  url: "http://localhost:6789"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "NZBGet"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After startup, open http://localhost:6789 in your browser. This recipe uses
+    the LinuxServer NZBGet image with local config and downloads volumes,
+    suitable for quick local testing.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It does not configure
+    advanced security, reverse proxies, or automation tools.
+

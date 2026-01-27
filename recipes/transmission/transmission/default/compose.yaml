@@ -1,0 +1,20 @@
+services:
+  transmission:
+    image: lscr.io/linuxserver/transmission:latest
+    restart: unless-stopped
+    ports:
+      - "9091:9091"
+      - "51413:51413"
+      - "51413:51413/udp"
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Etc/UTC
+    volumes:
+      - transmission-config:/config
+      - transmission-downloads:/downloads
+
+volumes:
+  transmission-config:
+  transmission-downloads:
+

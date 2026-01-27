@@ -1,0 +1,35 @@
+services:
+  database:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hedgedoc
+      POSTGRES_PASSWORD: hedgedoc
+      POSTGRES_DB: hedgedoc
+    volumes:
+      - hedgedoc-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hedgedoc -d hedgedoc"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  app:
+    image: quay.io/hedgedoc/hedgedoc:1.10.5
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      CMD_DB_URL: postgres://hedgedoc:hedgedoc@database:5432/hedgedoc
+      CMD_DOMAIN: localhost
+      CMD_URL_ADDPORT: "true"
+    ports:
+      - "3004:3000"
+    volumes:
+      - hedgedoc-uploads:/hedgedoc/public/uploads
+
+volumes:
+  hedgedoc-db:
+  hedgedoc-uploads:
+

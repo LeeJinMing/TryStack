@@ -1,0 +1,41 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: grafana
+  repo: grafana
+  ref: ">=9.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: grafana
+    protocol: http
+    hostPort: 3002
+    containerPort: 3000
+
+ui:
+  url: "http://localhost:3002"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "Grafana"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After startup, open http://localhost:3002 in your browser. Log in with the
+    default admin credentials from the upstream Grafana documentation and follow
+    the prompts to add your first data source and dashboard.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It runs a single Grafana
+    instance with a local data volume and does not configure persistence for
+    external databases, authentication providers, or high-availability setups.
+

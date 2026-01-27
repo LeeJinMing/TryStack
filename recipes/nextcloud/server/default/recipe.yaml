@@ -1,0 +1,40 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: nextcloud
+  repo: server
+  ref: ">=25.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: app
+    protocol: http
+    hostPort: 8083
+    containerPort: 80
+
+ui:
+  url: "http://localhost:8083"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "Nextcloud"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After startup, open http://localhost:8083 in your browser and follow the
+    Nextcloud installer to create an admin account. This recipe uses a local
+    MariaDB container for storage.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It does not configure
+    HTTPS, external storage, or clustering.
+

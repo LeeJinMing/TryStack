@@ -1,0 +1,39 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: jellyfin
+  repo: jellyfin
+  ref: ">=10.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: jellyfin
+    protocol: http
+    hostPort: 8096
+    containerPort: 8096
+
+ui:
+  url: "http://localhost:8096"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "Jellyfin"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After startup, open http://localhost:8096 in your browser. Follow the Jellyfin
+    onboarding wizard to create an admin user and point the server at your media folders.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It uses a simple single-node
+    setup and does not configure hardware acceleration, remote access, HTTPS, or backups.
+

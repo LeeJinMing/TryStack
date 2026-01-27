@@ -1,0 +1,41 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: miniflux
+  repo: v2
+  ref: ">=2.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: miniflux
+    protocol: http
+    hostPort: 8081
+    containerPort: 8080
+
+ui:
+  url: "http://localhost:8081"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "Miniflux"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After the stack is up, open http://localhost:8081 in your browser.
+    This recipe auto-creates an admin user with username "admin" and password "admin"
+    for local evaluation. You can change these credentials from the UI afterwards.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It uses a simple Postgres
+    container and stores all data in a local Docker volume. It does not cover
+    production hardening, backups, or external database configuration.
+

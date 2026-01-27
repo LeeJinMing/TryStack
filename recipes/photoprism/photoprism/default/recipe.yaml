@@ -1,0 +1,41 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: photoprism
+  repo: photoprism
+  ref: ">=1.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: photoprism
+    protocol: http
+    hostPort: 2342
+    containerPort: 2342
+
+ui:
+  url: "http://localhost:2342"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "PhotoPrism"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After startup, open http://localhost:2342 in your browser and log in with
+    the admin password configured in the compose file (default: \"photoprism\").
+    This recipe uses SQLite and local volumes for a quick local test.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It does not configure
+    external databases, object storage, or production hardening. Change the
+    admin password if you expose the service beyond localhost.
+

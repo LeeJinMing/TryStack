@@ -1,0 +1,41 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: benphelps
+  repo: homepage
+  # homepage 经常快速迭代，这里先允许任意 0.x/1.x 版本
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: homepage
+    protocol: http
+    hostPort: 3000
+    containerPort: 3000
+
+ui:
+  url: "http://localhost:3000"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    # homepage 默认首页包含 Dashboard 文本
+    match: "Dashboard"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    On first run, open the UI at http://localhost:3000 and follow the README
+    in the upstream repo to configure your services/cards via config files.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It uses a simple single-node
+    docker compose setup and does not cover HTTPS, auth, secrets, backups, or HA.
+

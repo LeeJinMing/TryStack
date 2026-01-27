@@ -1,0 +1,12 @@
+services:
+  seafile:
+    image: seafileltd/seafile-mc:latest
+    restart: unless-stopped
+    ports:
+      - "8084:80"
+    volumes:
+      - seafile-data:/shared
+
+volumes:
+  seafile-data:
+

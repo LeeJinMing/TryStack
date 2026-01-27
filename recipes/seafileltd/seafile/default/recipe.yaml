@@ -1,0 +1,40 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: seafileltd
+  repo: seafile
+  ref: ">=9.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: seafile
+    protocol: http
+    hostPort: 8084
+    containerPort: 80
+
+ui:
+  url: "http://localhost:8084"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "Seafile"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After startup, open http://localhost:8084 in your browser and follow the
+    Seafile web installer to create an admin account. This recipe uses the
+    all-in-one Seafile image with an internal database, suitable for local tests.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It does not configure
+    external databases, HTTPS, or production hardening.
+

@@ -1,0 +1,12 @@
+services:
+  trilium:
+    image: zadam/trilium:latest
+    restart: unless-stopped
+    ports:
+      - "8082:8080"
+    volumes:
+      - trilium-data:/home/node/trilium-data
+
+volumes:
+  trilium-data:
+

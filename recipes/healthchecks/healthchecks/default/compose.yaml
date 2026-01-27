@@ -1,0 +1,22 @@
+services:
+  healthchecks:
+    image: healthchecks/healthchecks:latest
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      DB: sqlite
+      DB_NAME: /data/hc.sqlite
+      DEBUG: "False"
+      SITE_ROOT: http://localhost:8000
+      DEFAULT_FROM_EMAIL: local@example.invalid
+      EMAIL_HOST: localhost
+      EMAIL_HOST_USER: ""
+      EMAIL_HOST_PASSWORD: ""
+      SECRET_KEY: "change-me-for-production"
+    volumes:
+      - healthchecks-data:/data
+
+volumes:
+  healthchecks-data:
+

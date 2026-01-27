@@ -1,0 +1,14 @@
+services:
+  homepage:
+    image: ghcr.io/benphelps/homepage:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # For a quick local try we mount a named volume; users can later switch
+      # to a host path if they want to keep config files under git.
+      - homepage-config:/app/config
+
+volumes:
+  homepage-config:
+

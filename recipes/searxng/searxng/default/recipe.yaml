@@ -1,0 +1,40 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: searxng
+  repo: searxng
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: searxng
+    protocol: http
+    hostPort: 8086
+    containerPort: 8080
+
+ui:
+  url: "http://localhost:8086"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "SearXNG"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After startup, open http://localhost:8086 in your browser. This recipe uses
+    the official SearXNG image with a simple local configuration suitable for
+    quick testing.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It does not configure
+    HTTPS, reverse proxies, or advanced settings like API keys and blacklists.
+

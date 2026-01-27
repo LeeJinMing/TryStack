@@ -1,0 +1,40 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: FreshRSS
+  repo: FreshRSS
+  ref: ">=1.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: freshrss
+    protocol: http
+    hostPort: 8080
+    containerPort: 80
+
+ui:
+  url: "http://localhost:8080"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "FreshRSS"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After the container is up, open http://localhost:8080 and follow the
+    FreshRSS web installer to create the first admin user and database.
+    This recipe uses the simplest all-in-one container suitable for local trials.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It does not configure
+    mail, HTTPS, external database, or background jobs for production.
+

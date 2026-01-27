@@ -1,0 +1,40 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: hedgedoc
+  repo: hedgedoc
+  ref: ">=1.10.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: app
+    protocol: http
+    hostPort: 3004
+    containerPort: 3000
+
+ui:
+  url: "http://localhost:3004"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "HedgeDoc"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After startup, open http://localhost:3004 in your browser. This recipe uses
+    a local Postgres container and the official HedgeDoc image, suitable for
+    quick collaborative note-taking tests.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It does not configure
+    HTTPS, reverse proxies, or external databases.
+

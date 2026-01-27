@@ -1,0 +1,39 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: n8n-io
+  repo: n8n
+  ref: ">=1.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: n8n
+    protocol: http
+    hostPort: 5678
+    containerPort: 5678
+
+ui:
+  url: "http://localhost:5678"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "n8n"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After startup, open http://localhost:5678 in your browser. The first user
+    will be able to configure workflows and credentials for local testing.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It does not configure
+    external databases, HTTPS, or scaled worker setups.
+

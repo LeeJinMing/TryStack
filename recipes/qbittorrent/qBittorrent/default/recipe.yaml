@@ -1,0 +1,40 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: qbittorrent
+  repo: qBittorrent
+  ref: ">=4.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: qbittorrent
+    protocol: http
+    hostPort: 8080
+    containerPort: 8080
+
+ui:
+  url: "http://localhost:8080"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "qBittorrent"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After startup, open http://localhost:8080 in your browser. This recipe uses
+    the LinuxServer qBittorrent image with local config and downloads volumes,
+    suitable for quick local testing.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It does not configure
+    advanced networking, VPN, or reverse proxies.
+

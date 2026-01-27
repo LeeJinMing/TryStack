@@ -1,0 +1,18 @@
+services:
+  nzbget:
+    image: lscr.io/linuxserver/nzbget:latest
+    restart: unless-stopped
+    ports:
+      - "6789:6789"
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: Etc/UTC
+    volumes:
+      - nzbget-config:/config
+      - nzbget-downloads:/downloads
+
+volumes:
+  nzbget-config:
+  nzbget-downloads:
+

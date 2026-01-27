@@ -1,0 +1,39 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: zadam
+  repo: trilium
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: trilium
+    protocol: http
+    hostPort: 8082
+    containerPort: 8080
+
+ui:
+  url: "http://localhost:8082"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "Trilium"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After startup, open http://localhost:8082 in your browser to complete the
+    initial Trilium setup and create your first notes.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It uses a single container
+    with a local data volume and does not cover backups, encryption, or clustering.
+

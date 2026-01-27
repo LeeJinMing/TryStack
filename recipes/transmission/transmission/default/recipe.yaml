@@ -1,0 +1,40 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: transmission
+  repo: transmission
+  ref: ">=3.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: transmission
+    protocol: http
+    hostPort: 9091
+    containerPort: 9091
+
+ui:
+  url: "http://localhost:9091"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "Transmission"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After startup, open http://localhost:9091 in your browser. This recipe uses
+    the LinuxServer Transmission image with local config and downloads volumes,
+    suitable for quick local testing.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It does not configure
+    VPN, reverse proxies, or advanced access control.
+

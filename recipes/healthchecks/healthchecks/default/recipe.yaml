@@ -1,0 +1,41 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: healthchecks
+  repo: healthchecks
+  ref: ">=3.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: healthchecks
+    protocol: http
+    hostPort: 8000
+    containerPort: 8000
+
+ui:
+  url: "http://localhost:8000"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+    match: "Healthchecks"
+
+env:
+  required: []
+  optional: []
+
+notes:
+  setup: |
+    After startup, open http://localhost:8000 in your browser. This recipe uses
+    the built-in SQLite database and dummy email settings suitable for local
+    evaluation. For full email-based alerts, follow the upstream docs to
+    configure SMTP and a proper SECRET_KEY.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It does not configure
+    production-grade email delivery, HTTPS, or external databases.
+

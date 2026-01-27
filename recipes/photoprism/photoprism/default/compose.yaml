@@ -1,0 +1,19 @@
+services:
+  photoprism:
+    image: photoprism/photoprism:latest
+    restart: unless-stopped
+    ports:
+      - "2342:2342"
+    environment:
+      PHOTOPRISM_ADMIN_PASSWORD: "photoprism"
+      PHOTOPRISM_DEBUG: "false"
+      PHOTOPRISM_PUBLIC: "true"
+      PHOTOPRISM_DATABASE_DRIVER: "sqlite"
+    volumes:
+      - photoprism-storage:/photoprism/storage
+      - photoprism-originals:/photoprism/originals
+
+volumes:
+  photoprism-storage:
+  photoprism-originals:
+
