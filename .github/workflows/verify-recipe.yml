@@ -167,11 +167,18 @@ jobs:
               docker compose -p "$proj" -f "$compose_file" ps || true
               echo "--- docker compose logs (tail) ---"
               docker compose -p "$proj" -f "$compose_file" logs --no-color --tail 200 || true
+              echo "--- disk usage ---"
+              df -h || true
+              docker system df || true
               failures=$((failures+1))
             fi
 
             # Cleanup
             docker compose -p "$proj" -f "$compose_file" down -v --remove-orphans || true
+            # GitHub-hosted runners have limited disk space. Pulling many large images across
+            # multiple recipes can fill /var/lib/docker and fail with "no space left on device".
+            # Prune aggressively after each recipe since runners are ephemeral.
+            docker system prune -af --volumes >/dev/null 2>&1 || true
             popd >/dev/null
           done
 
