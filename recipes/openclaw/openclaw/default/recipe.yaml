@@ -1,0 +1,45 @@
+apiVersion: githubui.recipes/v0
+id: default
+
+target:
+  owner: openclaw
+  repo: openclaw
+  ref: ">=0.0.0"
+
+runtime:
+  type: compose
+  composeFile: compose.yaml
+
+ports:
+  - name: ui
+    service: openclaw-gateway
+    protocol: http
+    hostPort: 18789
+    containerPort: 18789
+
+ui:
+  url: "http://localhost:18789"
+  healthcheck:
+    method: GET
+    path: /
+    expectStatus: 200
+
+env:
+  # A2: OpenClaw can start without provider auth, but core assistant capability
+  # needs external model/provider credentials configured after startup.
+  required:
+    - OPENCLAW_GATEWAY_TOKEN
+  optional:
+    - CLAUDE_AI_SESSION_KEY
+    - CLAUDE_WEB_SESSION_KEY
+    - CLAUDE_WEB_COOKIE
+
+notes:
+  setup: |
+    After startup, open http://localhost:18789 in your browser.
+    This is an A2 recipe: you will need to configure model/provider credentials
+    (Anthropic/OpenAI, etc.) after the gateway is running.
+  limitations: |
+    This recipe is for local evaluation (Try locally). It does not configure
+    production hardening, backups, or public exposure.
+

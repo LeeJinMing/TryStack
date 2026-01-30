@@ -1,0 +1,54 @@
+services:
+  openclaw-gateway:
+    image: node:22-bookworm
+    restart: unless-stopped
+    environment:
+      HOME: /home/node
+      TERM: xterm-256color
+      # Local evaluation token (change for your own use)
+      OPENCLAW_GATEWAY_TOKEN: openclaw-local-token-change-me
+      # Optional provider auth (A2): configure after startup
+      CLAUDE_AI_SESSION_KEY: ""
+      CLAUDE_WEB_SESSION_KEY: ""
+      CLAUDE_WEB_COOKIE: ""
+    volumes:
+      - openclaw-config:/home/node/.openclaw
+      - openclaw-workspace:/home/node/.openclaw/workspace
+    ports:
+      - "18789:18789"
+      - "18790:18790"
+    command:
+      - bash
+      - -lc
+      - |
+        set -e
+        npm i -g openclaw@latest
+        openclaw gateway --bind lan --port 18789
+
+  openclaw-cli:
+    image: node:22-bookworm
+    environment:
+      HOME: /home/node
+      TERM: xterm-256color
+      BROWSER: echo
+      OPENCLAW_GATEWAY_TOKEN: openclaw-local-token-change-me
+      CLAUDE_AI_SESSION_KEY: ""
+      CLAUDE_WEB_SESSION_KEY: ""
+      CLAUDE_WEB_COOKIE: ""
+    volumes:
+      - openclaw-config:/home/node/.openclaw
+      - openclaw-workspace:/home/node/.openclaw/workspace
+    stdin_open: true
+    tty: true
+    entrypoint:
+      - bash
+      - -lc
+      - |
+        set -e
+        npm i -g openclaw@latest
+        exec openclaw "$@"
+
+volumes:
+  openclaw-config:
+  openclaw-workspace:
+

@@ -623,6 +623,68 @@ function renderRecipes(recipes, filterText) {
   }
 }
 
+function renderFeatured(recipes) {
+  const host = document.getElementById("featuredList");
+  const wrap = document.getElementById("featured");
+  if (!host || !wrap) return;
+  host.innerHTML = "";
+
+  // Curated spotlight (keep short, high-signal)
+  const picks = [
+    {
+      owner: "openclaw",
+      repo: "openclaw",
+      recipeId: "default",
+      badge: "A2",
+      note: "100k+ stars. Starts locally, then add model/provider auth in onboarding.",
+    },
+  ];
+
+  const cards = [];
+  for (const p of picks) {
+    const hit = recipes.find((r) => r.owner === p.owner && r.repo === p.repo && r.recipeId === (p.recipeId || "default"));
+    if (!hit) continue;
+    const repoId = `${hit.owner}/${hit.repo}`;
+    const command = buildUpCommand(hit.owner, hit.repo, hit.recipeId);
+
+    const header = el("div", { class: "recipe-title", text: hit.title });
+    const badge = el("span", { class: "badge", text: p.badge });
+    const meta = el("div", { class: "recipe-meta muted" }, [
+      el("span", { text: `recipe: ${hit.recipeId}` }),
+      el("span", { text: " · " }),
+      badge,
+    ]);
+    const snippet = el("div", { class: "recipe-snippet", text: p.note });
+    const cmd = el("code", { class: "recipe-cmd", text: command });
+
+    const copyBtn = el("button", { class: "btn primary", type: "button" }, []);
+    copyBtn.textContent = "Copy command";
+    copyBtn.addEventListener("click", async () => {
+      await copyToClipboard(command);
+      track("copy_command", { source: "featured_card", repo: repoId, recipeId: hit.recipeId || "default" });
+    });
+
+    const ghLink = el("a", { class: "btn", href: hit.github || "#", target: "_blank", rel: "noreferrer" }, []);
+    ghLink.textContent = "GitHub";
+
+    const card = el("div", { class: "featured-card" }, [
+      header,
+      meta,
+      snippet,
+      el("pre", { class: "recipe-pre" }, [cmd]),
+      el("div", { class: "recipe-actions" }, [copyBtn, ghLink]),
+    ]);
+    cards.push(card);
+  }
+
+  if (cards.length === 0) {
+    wrap.style.display = "none";
+    return;
+  }
+
+  for (const c of cards) host.appendChild(c);
+}
+
 async function loadRecipes() {
   // Prefer static build artifact; fall back to dev API.
   try {
@@ -659,6 +721,7 @@ async function initRecipes() {
     const data = await loadRecipes();
     const recipes = Array.isArray(data?.recipes) ? data.recipes : [];
     recipesVisibleCount = RECIPES_PAGE_SIZE;
+    renderFeatured(recipes);
     renderRecipes(recipes, "");
     search.addEventListener("input", () => {
       recipesVisibleCount = RECIPES_PAGE_SIZE;

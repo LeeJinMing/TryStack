@@ -176,6 +176,40 @@ ul {
   white-space: nowrap;
 }
 
+.featured {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.featured-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 14px;
+  background: #ffffff;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #111827;
+  color: #f9fafb;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 @media (max-width: 860px) {
   .section-head {
     flex-direction: column;
@@ -185,6 +219,9 @@ ul {
     flex-direction: column;
   }
   .recipes-grid {
+    grid-template-columns: 1fr;
+  }
+  .featured-grid {
     grid-template-columns: 1fr;
   }
   .input {

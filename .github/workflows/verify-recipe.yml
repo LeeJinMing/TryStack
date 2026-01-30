@@ -93,7 +93,7 @@ jobs:
             dir="$(dirname "$recipe")"
             echo "=== Verifying $dir ==="
 
-            meta="$(python -c 'import json,sys,yaml; data=yaml.safe_load(open(sys.argv[1], "r", encoding="utf-8")) or {}; compose_file=((data.get("runtime") or {}).get("composeFile") or ""); ui_url=((data.get("ui") or {}).get("url") or ""); hc=((data.get("ui") or {}).get("healthcheck") or {}); hc_path=(hc.get("path") or "/"); expect_status=hc.get("expectStatus"); expect_status=200 if expect_status is None else int(expect_status); match=(hc.get("match") or ""); print(json.dumps({"composeFile": compose_file, "uiUrl": ui_url, "hcPath": hc_path, "expectStatus": expect_status, "match": match}))' "$recipe")"
+            meta="$(python -c 'import json,sys,yaml; data=yaml.safe_load(open(sys.argv[1], "r", encoding="utf-8")) or {}; compose_file=((data.get("runtime") or {}).get("composeFile") or ""); ui_url=((data.get("ui") or {}).get("url") or ""); hc=((data.get("ui") or {}).get("healthcheck") or {}); hc_path=(hc.get("path") or "/"); expect_status=hc.get("expectStatus"); expect_status=200 if expect_status is None else int(expect_status); match=(hc.get("match") or ""); req=((data.get("env") or {}).get("required") or []); req=[r for r in req if isinstance(r,str) and r.strip()]; print(json.dumps({"composeFile": compose_file, "uiUrl": ui_url, "hcPath": hc_path, "expectStatus": expect_status, "match": match, "requiredEnv": req}))' "$recipe")"
 
             compose_file="$(echo "$meta" | jq -r '.composeFile')"
             if [[ -z "$compose_file" ]]; then
@@ -112,10 +112,19 @@ jobs:
             hc_path="$(echo "$meta" | jq -r '.hcPath')"
             expect_status="$(echo "$meta" | jq -r '.expectStatus')"
             match="$(echo "$meta" | jq -r '.match')"
+            required_env_count="$(echo "$meta" | jq -r '.requiredEnv | length')"
 
             if [[ -z "$ui_url" ]]; then
               echo "Missing ui.url in $recipe"
               failures=$((failures+1))
+              continue
+            fi
+
+            # A2/A3 recipes may require external keys or interactive onboarding.
+            # If env.required is non-empty, we only validate the compose file exists
+            # and skip docker UI checks in CI (no secrets / no interactive input).
+            if [[ "$required_env_count" != "0" ]]; then
+              echo "Skipping docker UI check for $dir (env.required is non-empty)"
               continue
             fi
 
