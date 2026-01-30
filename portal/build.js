@@ -328,6 +328,13 @@ copyDir(path.join(root, "src"), path.join(dist, "src"));
   if (fs.existsSync(src)) copyFile(src, dst);
 }
 
+// Optional: sitemap index for SEO / GSC
+{
+  const src = path.join(root, "sitemap-index.xml");
+  const dst = path.join(dist, "sitemap-index.xml");
+  if (fs.existsSync(src)) copyFile(src, dst);
+}
+
 // Optional: robots.txt for SEO / sitemap discovery
 {
   const src = path.join(root, "robots.txt");
