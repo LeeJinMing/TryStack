@@ -501,13 +501,21 @@ function renderRecipes(recipes, filterText) {
   if (!list) return;
   list.innerHTML = "";
 
+  const state = window.__TRYSTACK_FILTERS__ || { tiers: new Set(), categories: new Set() };
   const q = String(filterText || "").toLowerCase().trim();
-  const filtered = q
-    ? recipes.filter((r) => {
-        const hay = `${r.title} ${r.recipeId} ${r.snippet || ""}`.toLowerCase();
-        return hay.includes(q);
-      })
-    : recipes;
+  const filtered = recipes.filter((r) => {
+    const hay = `${r.title} ${r.recipeId} ${r.snippet || ""} ${r.category || ""}`.toLowerCase();
+    if (q && !hay.includes(q)) return false;
+    if (state.tiers?.size) {
+      const t = String(r.tier || "").toUpperCase();
+      if (!state.tiers.has(t)) return false;
+    }
+    if (state.categories?.size) {
+      const c = String(r.category || "");
+      if (!state.categories.has(c)) return false;
+    }
+    return true;
+  });
 
   setCount(`${filtered.length} / ${recipes.length}`);
 
@@ -530,11 +538,25 @@ function renderRecipes(recipes, filterText) {
 
   for (const r of slice) {
     const header = el("div", { class: "recipe-title", text: r.title });
-    const meta = el("div", { class: "recipe-meta muted", text: `recipe: ${r.recipeId}` });
+    const tier = String(r.tier || "").toUpperCase() || "A0";
+    const tierClass = `badge tier-${tier.toLowerCase()}`;
+    const badge = el("span", { class: tierClass, text: tier });
+    const meta = el("div", { class: "recipe-meta muted" }, [
+      el("span", { text: `recipe: ${r.recipeId}` }),
+      el("span", { text: " · " }),
+      badge,
+      el("span", { text: " · " }),
+      el("span", { text: String(r.category || "Other") }),
+    ]);
     const snippet = el("div", { class: "recipe-snippet", text: r.snippet || "" });
     const command = buildUpCommand(r.owner, r.repo, r.recipeId);
     const cmd = el("code", { class: "recipe-cmd", text: command });
     const repoId = `${r.owner}/${r.repo}`;
+
+    const kv = el("div", { class: "kv" }, [
+      el("span", { class: "k", text: "UI" }),
+      el("span", { class: "v", text: String(r?.ui?.url || "") || "(not set)" }),
+    ]);
 
     const copyBtn = el("button", { class: "btn primary", type: "button" }, []);
     copyBtn.textContent = "Copy command";
@@ -616,6 +638,7 @@ function renderRecipes(recipes, filterText) {
       header,
       meta,
       snippet,
+      kv,
       el("pre", { class: "recipe-pre" }, [cmd]),
       actions,
     ]);
@@ -685,6 +708,38 @@ function renderFeatured(recipes) {
   for (const c of cards) host.appendChild(c);
 }
 
+function renderFilters(recipes, onChange) {
+  const tiersEl = document.getElementById("tierChips");
+  const catsEl = document.getElementById("categoryChips");
+  if (!tiersEl || !catsEl) return;
+
+  const tiers = ["A0", "A1", "A2", "A3"].filter((t) => recipes.some((r) => String(r.tier || "").toUpperCase() === t));
+  const categories = Array.from(new Set(recipes.map((r) => String(r.category || "Other")))).sort((a, b) =>
+    a.localeCompare(b),
+  );
+
+  const state = (window.__TRYSTACK_FILTERS__ = window.__TRYSTACK_FILTERS__ || { tiers: new Set(), categories: new Set() });
+
+  function chip(text, set) {
+    const n = el("span", { class: "chip", text });
+    const isActive = set.has(text);
+    if (isActive) n.classList.add("active");
+    n.addEventListener("click", () => {
+      if (set.has(text)) set.delete(text);
+      else set.add(text);
+      renderFilters(recipes, onChange);
+      onChange();
+    });
+    return n;
+  }
+
+  tiersEl.innerHTML = "";
+  for (const t of tiers) tiersEl.appendChild(chip(t, state.tiers));
+
+  catsEl.innerHTML = "";
+  for (const c of categories) catsEl.appendChild(chip(c, state.categories));
+}
+
 async function loadRecipes() {
   // Prefer static build artifact; fall back to dev API.
   try {
@@ -722,6 +777,7 @@ async function initRecipes() {
     const recipes = Array.isArray(data?.recipes) ? data.recipes : [];
     recipesVisibleCount = RECIPES_PAGE_SIZE;
     renderFeatured(recipes);
+    renderFilters(recipes, () => renderRecipes(recipes, search.value));
     renderRecipes(recipes, "");
     search.addEventListener("input", () => {
       recipesVisibleCount = RECIPES_PAGE_SIZE;

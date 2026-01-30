@@ -70,6 +70,169 @@ function snippetFromReadme(readmeMd) {
   return safeText(first.replace(/[`*_>#]/g, "")).slice(0, 140);
 }
 
+function parseRecipeYaml(yamlText) {
+  const lines = String(yamlText || "").split(/\r?\n/);
+  const out = {
+    uiUrl: "",
+    uiPath: "/",
+    uiExpectStatus: 200,
+    uiMatch: "",
+    envRequired: [],
+    envOptional: [],
+  };
+
+  // Very small YAML subset parser for our consistent recipe.yaml files.
+  // We intentionally avoid adding extra dependencies to the portal build.
+  const pickQuoted = (s) => {
+    const m = String(s || "").match(/"([^"]*)"/);
+    return m ? m[1] : String(s || "").trim();
+  };
+
+  let section = "";
+  let envSub = "";
+  for (const raw of lines) {
+    const line = String(raw);
+    const t = line.trim();
+    if (!t || t.startsWith("#")) continue;
+
+    if (/^ui:\s*$/.test(t)) {
+      section = "ui";
+      continue;
+    }
+    if (/^env:\s*$/.test(t)) {
+      section = "env";
+      envSub = "";
+      continue;
+    }
+    if (section === "env") {
+      if (/^required:\s*\[\]\s*$/.test(t)) {
+        out.envRequired = [];
+        continue;
+      }
+      if (/^optional:\s*\[\]\s*$/.test(t)) {
+        out.envOptional = [];
+        continue;
+      }
+      if (/^required:\s*$/.test(t)) {
+        envSub = "required";
+        continue;
+      }
+      if (/^optional:\s*$/.test(t)) {
+        envSub = "optional";
+        continue;
+      }
+      const m = t.match(/^-+\s*(.+)\s*$/);
+      if (m && envSub) {
+        const v = String(m[1] || "").trim().replace(/^["']|["']$/g, "");
+        if (v) {
+          if (envSub === "required") out.envRequired.push(v);
+          else out.envOptional.push(v);
+        }
+      }
+      continue;
+    }
+
+    if (section === "ui") {
+      const mUrl = t.match(/^url:\s*(.+)$/);
+      if (mUrl) {
+        out.uiUrl = pickQuoted(mUrl[1]);
+        continue;
+      }
+      if (/^healthcheck:\s*$/.test(t)) {
+        section = "ui.healthcheck";
+        continue;
+      }
+      continue;
+    }
+
+    if (section === "ui.healthcheck") {
+      const mPath = t.match(/^path:\s*(.+)$/);
+      if (mPath) {
+        out.uiPath = pickQuoted(mPath[1]) || "/";
+        continue;
+      }
+      const mStatus = t.match(/^expectStatus:\s*(\d+)\s*$/);
+      if (mStatus) {
+        out.uiExpectStatus = Number(mStatus[1]) || 200;
+        continue;
+      }
+      const mMatch = t.match(/^match:\s*(.+)$/);
+      if (mMatch) {
+        out.uiMatch = pickQuoted(mMatch[1]);
+        continue;
+      }
+      continue;
+    }
+  }
+
+  return out;
+}
+
+function countComposeServices(composeText) {
+  const lines = String(composeText || "").split(/\r?\n/);
+  let inServices = false;
+  let baseIndent = null;
+  const names = new Set();
+
+  for (const raw of lines) {
+    const line = String(raw);
+    const t = line.trim();
+    if (!t || t.startsWith("#")) continue;
+
+    if (!inServices) {
+      if (t === "services:") {
+        inServices = true;
+        baseIndent = line.indexOf("s"); // indent of "services:"
+      }
+      continue;
+    }
+
+    // exit when we hit a new top-level key with same indent as services
+    const indent = line.search(/\S|$/);
+    if (baseIndent != null && indent <= baseIndent && /^[A-Za-z0-9_.-]+:\s*$/.test(t) && t !== "services:") {
+      break;
+    }
+
+    // service key is usually 2-space indented under services
+    if (/^[A-Za-z0-9_.-]+:\s*$/.test(t) && indent > (baseIndent ?? 0)) {
+      names.add(t.replace(/:\s*$/, ""));
+    }
+  }
+
+  return names.size;
+}
+
+function guessTier({ envRequiredCount, composeServicesCount }) {
+  if (envRequiredCount > 0) return "A2";
+  return composeServicesCount > 1 ? "A1" : "A0";
+}
+
+function guessCategory(owner, repo) {
+  const key = `${owner}/${repo}`.toLowerCase();
+  const map = {
+    "louislam/uptime-kuma": "Monitoring",
+    "grafana/grafana": "Monitoring",
+    "healthchecks/healthchecks": "Monitoring",
+    "freshRSS/freshrss": "RSS",
+    "miniflux/v2": "RSS",
+    "zadam/trilium": "Notes",
+    "usememos/memos": "Notes",
+    "jellyfin/jellyfin": "Media",
+    "benphelps/homepage": "Dashboard",
+    "portainer/portainer": "DevOps",
+    "searxng/searxng": "Search",
+    "nextcloud/server": "Files",
+    "seafileltd/seafile": "Files",
+    "photoprism/photoprism": "Photos",
+    "qbittorrent/qbittorrent": "Download",
+    "transmission/transmission": "Download",
+    "nzbget/nzbget": "Download",
+    "n8n-io/n8n": "Automation",
+    "openclaw/openclaw": "AI",
+  };
+  return map[key] || "Other";
+}
+
 function buildRecipesIndex() {
   const entries = [];
   for (const owner of listDirs(recipesRoot)) {
@@ -81,6 +244,14 @@ function buildRecipesIndex() {
         if (!fs.existsSync(recipeYamlPath)) continue;
 
         const readmeMd = fs.existsSync(readmePath) ? fs.readFileSync(readmePath, "utf8") : "";
+        const recipeYaml = fs.readFileSync(recipeYamlPath, "utf8");
+        const parsed = parseRecipeYaml(recipeYaml);
+        const composePath = path.join(recipeDir, "compose.yaml");
+        const composeText = fs.existsSync(composePath) ? fs.readFileSync(composePath, "utf8") : "";
+        const composeServicesCount = composeText ? countComposeServices(composeText) : 0;
+        const tier = guessTier({ envRequiredCount: parsed.envRequired.length, composeServicesCount });
+        const category = guessCategory(owner, repo);
+
         const args =
           recipeId === "default"
             ? `trystack up ${owner}/${repo}`
@@ -95,6 +266,18 @@ function buildRecipesIndex() {
           github: `https://github.com/${owner}/${repo}`,
           command,
           snippet: snippetFromReadme(readmeMd),
+          tier,
+          category,
+          ui: {
+            url: parsed.uiUrl || "",
+            path: parsed.uiPath || "/",
+            expectStatus: parsed.uiExpectStatus || 200,
+            match: parsed.uiMatch || "",
+          },
+          env: {
+            required: parsed.envRequired,
+            optional: parsed.envOptional,
+          },
           readme: fs.existsSync(readmePath)
             ? `data/readmes/${owner}/${repo}/${recipeId}.md`
             : null,
@@ -104,6 +287,10 @@ function buildRecipesIndex() {
   }
 
   entries.sort((a, b) => {
+    const tierRank = (t) => ({ A0: 0, A1: 1, A2: 2, A3: 3 }[String(t || "A0")] ?? 9);
+    const ra = tierRank(a.tier);
+    const rb = tierRank(b.tier);
+    if (ra !== rb) return ra - rb;
     const ka = `${a.owner}/${a.repo}/${a.recipeId}`.toLowerCase();
     const kb = `${b.owner}/${b.repo}/${b.recipeId}`.toLowerCase();
     return ka.localeCompare(kb);
