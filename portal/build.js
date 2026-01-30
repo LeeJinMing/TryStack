@@ -316,6 +316,13 @@ ensureDir(dist);
 }
 copyDir(path.join(root, "src"), path.join(dist, "src"));
 
+// Optional: sitemap for SEO / GSC
+{
+  const src = path.join(root, "sitemap.xml");
+  const dst = path.join(dist, "sitemap.xml");
+  if (fs.existsSync(src)) copyFile(src, dst);
+}
+
 // Optional: ship promo video with Pages artifact (kept at repo root).
 // This keeps the Portal demo playable without relying on Release assets.
 {

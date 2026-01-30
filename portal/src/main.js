@@ -659,7 +659,8 @@ function renderFeatured(recipes) {
       repo: "openclaw",
       recipeId: "default",
       badge: "A2",
-      note: "100k+ stars. Starts locally, then add model/provider auth in onboarding.",
+      note:
+        "OpenClaw (formerly Moltbot/Clawdbot) — self-hosted personal AI assistant. Multi-channel inbox (WhatsApp/Telegram/Slack/Discord). Starts locally in minutes; finish onboarding to connect Anthropic/OpenAI.",
     },
   ];
 
