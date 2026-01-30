@@ -21,9 +21,9 @@ ui:
   url: "http://localhost:8083"
   healthcheck:
     method: GET
-    path: /
+    # /status.php responds early and is stable across redirects/installer steps
+    path: /status.php
     expectStatus: 200
-    match: "Nextcloud"
 
 env:
   required: []

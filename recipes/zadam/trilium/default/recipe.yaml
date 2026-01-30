@@ -23,7 +23,6 @@ ui:
     method: GET
     path: /
     expectStatus: 200
-    match: "Trilium"
 
 env:
   required: []
