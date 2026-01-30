@@ -22,8 +22,9 @@ ui:
   healthcheck:
     method: GET
     path: /
-    expectStatus: 200
-    match: "NZBGet"
+    # NZBGet UI requires authentication by default in common container images.
+    # Treat HTTP 401 as "UI is reachable" for Try locally verification.
+    expectStatus: 401
 
 env:
   required: []

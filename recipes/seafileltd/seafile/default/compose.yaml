@@ -4,6 +4,12 @@ services:
     restart: unless-stopped
     ports:
       - "8084:80"
+    environment:
+      # Minimal config for first boot (local evaluation only)
+      SEAFILE_SERVER_HOSTNAME: localhost
+      SEAFILE_ADMIN_EMAIL: admin@example.invalid
+      SEAFILE_ADMIN_PASSWORD: admin12345
+      TIME_ZONE: Etc/UTC
     volumes:
       - seafile-data:/shared
 
