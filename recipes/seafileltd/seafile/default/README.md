@@ -3,7 +3,7 @@
 ## What you get
 
 - **Try locally**: A self-hosted file sync and collaboration UI at `http://localhost:8084`.
-- **All-in-one image**: Uses the `seafileltd/seafile-mc` image with internal services.
+- **Local dependencies included**: Uses `seafileltd/seafile-mc` with a local MariaDB + Memcached.
 
 ## Run
 
@@ -13,8 +13,12 @@ In this directory:
 docker compose up -d
 ```
 
-Then open `http://localhost:8084` in your browser and follow the installer to
-create an admin account.
+Then open `http://localhost:8084` in your browser.
+
+This recipe auto-creates an admin user for local evaluation:
+
+- **Email**: `admin@example.invalid`
+- **Password**: `admin12345`
 
 ## Stop
 

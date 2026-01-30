@@ -1,12 +1,39 @@
 services:
+  db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: seafile
+      MYSQL_LOG_CONSOLE: "true"
+      MARIADB_AUTO_UPGRADE: "1"
+      MARIADB_DISABLE_UPGRADE_BACKUP: "1"
+    volumes:
+      - seafile-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -pseafile || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  memcached:
+    image: memcached:1.6-alpine
+    restart: unless-stopped
+
   seafile:
     image: seafileltd/seafile-mc:latest
     restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      memcached:
+        condition: service_started
     ports:
       - "8084:80"
     environment:
-      # Minimal config for first boot (local evaluation only)
-      SEAFILE_SERVER_HOSTNAME: localhost
+      DB_HOST: db
+      DB_ROOT_PASSWD: seafile
+      # Seafile requires a valid IP or domain name (plain "localhost" is rejected)
+      SEAFILE_SERVER_HOSTNAME: 127.0.0.1
       SEAFILE_ADMIN_EMAIL: admin@example.invalid
       SEAFILE_ADMIN_PASSWORD: admin12345
       TIME_ZONE: Etc/UTC
@@ -14,5 +41,6 @@ services:
       - seafile-data:/shared
 
 volumes:
+  seafile-db:
   seafile-data:
 
