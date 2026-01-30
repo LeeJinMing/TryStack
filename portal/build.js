@@ -172,6 +172,7 @@ function countComposeServices(composeText) {
   const lines = String(composeText || "").split(/\r?\n/);
   let inServices = false;
   let baseIndent = null;
+  let serviceIndent = null;
   const names = new Set();
 
   for (const raw of lines) {
@@ -193,9 +194,13 @@ function countComposeServices(composeText) {
       break;
     }
 
-    // service key is usually 2-space indented under services
+    // Count only *direct children* under services (service names),
+    // not nested keys like "image:", "ports:", etc.
     if (/^[A-Za-z0-9_.-]+:\s*$/.test(t) && indent > (baseIndent ?? 0)) {
-      names.add(t.replace(/:\s*$/, ""));
+      if (serviceIndent == null) serviceIndent = indent;
+      if (indent === serviceIndent) {
+        names.add(t.replace(/:\s*$/, ""));
+      }
     }
   }
 
@@ -320,6 +325,13 @@ copyDir(path.join(root, "src"), path.join(dist, "src"));
 {
   const src = path.join(root, "sitemap.xml");
   const dst = path.join(dist, "sitemap.xml");
+  if (fs.existsSync(src)) copyFile(src, dst);
+}
+
+// Optional: robots.txt for SEO / sitemap discovery
+{
+  const src = path.join(root, "robots.txt");
+  const dst = path.join(dist, "robots.txt");
   if (fs.existsSync(src)) copyFile(src, dst);
 }
 
